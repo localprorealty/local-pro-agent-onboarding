@@ -152,6 +152,8 @@ export default function App() {
     if (!lenisInstance || prefersReducedMotion) return;
 
     let idleTimeout: any = null;
+    let lastX = -1;
+    let lastY = -1;
 
     const isUserInExclusionZone = () => {
       // 1. Check if chat panel is open
@@ -175,7 +177,7 @@ export default function App() {
           const rect = el.getBoundingClientRect();
           const vh = window.innerHeight;
           // Visible if overlapping with the viewport
-          const isVisible = rect.top < vh && rect.bottom > 0;
+          const isVisible = rect.top < vh - 20 && rect.bottom > 20;
           if (isVisible) {
             return true;
           }
@@ -227,15 +229,20 @@ export default function App() {
       resetIdleTimer();
     };
 
+    const handleMouseMove = (e: MouseEvent) => {
+      // Ignore initial dummy/scroll-induced mousemove events if position hasn't actually changed
+      if (e.clientX === lastX && e.clientY === lastY) return;
+      lastX = e.clientX;
+      lastY = e.clientY;
+      handleActivity();
+    };
+
     // Listen to standard interaction events
-    window.addEventListener("mousemove", handleActivity);
+    window.addEventListener("mousemove", handleMouseMove);
     window.addEventListener("mousedown", handleActivity);
     window.addEventListener("keydown", handleActivity);
-    window.addEventListener("wheel", handleActivity);
-    window.addEventListener("touchmove", handleActivity);
-
-    // Listen to Lenis scroll events as well
-    lenisInstance.on("scroll", handleActivity);
+    window.addEventListener("wheel", handleActivity, { passive: true });
+    window.addEventListener("touchmove", handleActivity, { passive: true });
 
     // Start timer on mount
     resetIdleTimer();
@@ -244,12 +251,11 @@ export default function App() {
       if (idleTimeout) {
         clearTimeout(idleTimeout);
       }
-      window.removeEventListener("mousemove", handleActivity);
+      window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mousedown", handleActivity);
       window.removeEventListener("keydown", handleActivity);
       window.removeEventListener("wheel", handleActivity);
       window.removeEventListener("touchmove", handleActivity);
-      lenisInstance.off("scroll", handleActivity);
     };
   }, [lenisInstance, prefersReducedMotion]);
 
