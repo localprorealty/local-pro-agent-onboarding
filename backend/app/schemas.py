@@ -16,3 +16,11 @@ class MLSLookupRequest(BaseModel):
     city: str
     state: str
     zip: str
+
+class ListingCopyRequest(BaseModel):
+    propertyData: dict
+    notes: str | None = None
+
+class ListingCopyResponse(BaseModel):
+    description: str
+    socialCaption: str

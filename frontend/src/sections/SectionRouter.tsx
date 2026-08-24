@@ -1,7 +1,6 @@
 import type { SectionData } from "@/data/content";
 import { HeroSection } from "./HeroSection";
 import { HiddenWeightSection } from "./HiddenWeightSection";
-import { DemoPlaceholder } from "./DemoPlaceholder";
 import { GoogleCaptureSection } from "./GoogleCaptureSection";
 import { NarrativeSection } from "./NarrativeSection";
 import { HeartSection } from "./HeartSection";
@@ -9,6 +8,7 @@ import { FormSection } from "./FormSection";
 import { RevenueCalculator } from "./RevenueCalculator";
 import { AddressAutofillDemo } from "./AddressAutofillDemo";
 import { ExtensionFillDemo } from "./ExtensionFillDemo";
+import { AIMarketingDemo } from "./AIMarketingDemo";
 
 interface SectionRouterProps {
   data: SectionData;
@@ -25,7 +25,7 @@ export function SectionRouter({ data, sharedMlsData, setSharedMlsData }: Section
     case "platform-demo":
       return <AddressAutofillDemo data={data} setSharedMlsData={setSharedMlsData} />;
     case "ai-marketing":
-      return <DemoPlaceholder data={data} />;
+      return <AIMarketingDemo data={data} sharedMlsData={sharedMlsData} />;
     case "extension-demo":
       return <ExtensionFillDemo data={data} sharedMlsData={sharedMlsData} />;
     case "revenue-calculator":

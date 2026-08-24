@@ -20,6 +20,7 @@ export function useLenis() {
       smoothWheel: true,
     });
     lenisRef.current = lenis;
+    (window as any).lenisInstance = lenis;
 
     let rafId: number;
     function raf(time: number) {

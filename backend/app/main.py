@@ -8,7 +8,7 @@ from groq import Groq
 
 from app.config import settings
 from app.prompts import NORTH_SYSTEM_PROMPT
-from app.schemas import ChatRequest, ChatResponse, MLSLookupRequest
+from app.schemas import ChatRequest, ChatResponse, MLSLookupRequest, ListingCopyRequest, ListingCopyResponse
 from app.rets_service import RETSService
 
 logger = logging.getLogger(__name__)
@@ -39,7 +39,8 @@ app.add_middleware(
 RATE_LIMIT_DURATION = 60  # seconds
 rate_limit_buckets: dict[str, dict[str, list[float]]] = {
     "address-suggest": {},
-    "mls-lookup": {}
+    "mls-lookup": {},
+    "generate-listing-copy": {}
 }
 
 def check_rate_limit(request: Request, endpoint: str, limit: int):
@@ -338,5 +339,94 @@ async def address_suggest(request: Request, q: str = ""):
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail="Address suggestion service is temporarily unavailable."
         )
+
+
+@app.post("/generate-listing-copy", response_model=ListingCopyResponse)
+async def generate_listing_copy(request: Request, req: ListingCopyRequest):
+    """
+    POST /generate-listing-copy
+    Generates a professional property description and social media caption
+    based on whitelisted MLS property details and optional notes.
+    """
+    check_rate_limit(request, "generate-listing-copy", 10)
+
+    if not settings or not settings.GROQ_API_KEY:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Server configuration error: GROQ_API_KEY is not set."
+        )
+
+    data = req.propertyData
+    details_str = "\n".join([f"- {k}: {v}" for k, v in data.items()])
+    notes_str = req.notes.strip() if req.notes else "None"
+
+    system_prompt = (
+        "You are North, a helpful guide and AI teammate at LocalPRO Realty. "
+        "Your task is to write high-end, premium, and compelling real estate marketing copy. "
+        "You must speak in a professional, confident, yet warm and inviting tone. "
+        "Provide your response EXACTLY as a JSON object containing two keys: "
+        '"description" (a detailed paragraph about the home) and '
+        '"socialCaption" (a short, catchy Instagram/social post caption with relevant emojis/hashtags). '
+        "Do not include any extra text, markdown formatting, or explanations outside the JSON object itself."
+    )
+
+    user_prompt = (
+        f"Generate listing marketing copy for a property with these details:\n"
+        f"{details_str}\n\n"
+        f"Additional agent notes:\n"
+        f"\"{notes_str}\"\n\n"
+        f"Return only a valid JSON object matching this structure:\n"
+        f"{{\n"
+        f'  "description": "...",\n'
+        f'  "socialCaption": "..."\n'
+        f"}}"
+    )
+
+    try:
+        client = Groq(api_key=settings.GROQ_API_KEY)
+        completion = client.chat.completions.create(
+            model=settings.GROQ_MODEL,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt}
+            ],
+            temperature=0.7,
+            max_tokens=600,
+            response_format={"type": "json_object"}
+        )
+        content = completion.choices[0].message.content
+        if not content:
+            raise ValueError("Groq returned an empty response.")
+        
+        import json
+        result = json.loads(content.strip())
+        
+        description = result.get("description", "")
+        social_caption = result.get("socialCaption", "")
+        
+        if not description or not social_caption:
+            raise ValueError("Missing description or socialCaption in generated JSON.")
+            
+        return ListingCopyResponse(description=description, socialCaption=social_caption)
+        
+    except Exception as e:
+        logger.error(f"AI Listing copy generation error: {e}", exc_info=True)
+        # Fallback to local deterministic generator if Groq has an error so the demo remains functional
+        fallback_desc = (
+            f"Presenting this exceptional {data.get('Property Type', 'Property')}, featuring "
+            f"{data.get('Bedrooms', 'N/A')} bedrooms and {data.get('Bathrooms', 'N/A')} bathrooms. "
+            f"Boasting {data.get('Square Footage', 'N/A')} of living space on a lot of "
+            f"{data.get('Lot Size', 'N/A')}, this property was built in {data.get('Year Built', 'N/A')}. "
+            f"Offered at {data.get('List Price', 'N/A')}, it represents a fantastic opportunity in the market. "
+            f"{'Note: ' + req.notes if req.notes else ''}"
+        )
+        fallback_social = (
+            f"🏡 New Listing Alert! Check out this beautiful {data.get('Property Type', 'home')}! "
+            f"✨ {data.get('Bedrooms', 'N/A')} beds | {data.get('Bathrooms', 'N/A')} baths | "
+            f"{data.get('Square Footage', 'N/A')} | Offered at {data.get('List Price', 'N/A')}. "
+            f"Contact us to schedule a showing! #LocalPRORealty #RealEstate #DreamHome"
+        )
+        return ListingCopyResponse(description=fallback_desc, socialCaption=fallback_social)
+
 
 
