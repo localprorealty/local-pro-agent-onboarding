@@ -144,6 +144,112 @@ export default function App() {
     };
   }, [lenisInstance]);
 
+  // Gentle auto-advance for users who stop interacting for an extended period
+  useEffect(() => {
+    if (!lenisInstance || prefersReducedMotion) return;
+
+    let idleTimeout: any = null;
+
+    const isUserInExclusionZone = () => {
+      // 1. Check if chat panel is open
+      const isChatOpen = !!document.querySelector('[aria-label="Chat with North"]');
+      if (isChatOpen) return true;
+
+      // 2. Check if any input or interactive element is focused inside these sections
+      const active = document.activeElement;
+      if (
+        active &&
+        active.closest("#revenue-calculator, #platform-demo, #ai-marketing, #form, #close")
+      ) {
+        return true;
+      }
+
+      // 3. Check if any exclusion section is visible in the viewport
+      const exclusionIds = ["revenue-calculator", "platform-demo", "ai-marketing", "form", "close"];
+      for (const id of exclusionIds) {
+        const el = document.getElementById(id);
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          const vh = window.innerHeight;
+          // Visible if overlapping with the viewport
+          const isVisible = rect.top < vh && rect.bottom > 0;
+          if (isVisible) {
+            return true;
+          }
+        }
+      }
+
+      return false;
+    };
+
+    const resetIdleTimer = () => {
+      if (idleTimeout) {
+        clearTimeout(idleTimeout);
+      }
+
+      idleTimeout = setTimeout(() => {
+        if (isUserInExclusionZone()) {
+          // Reset and check again in another 9 seconds if currently in an exclusion zone
+          resetIdleTimer();
+          return;
+        }
+
+        const currentScroll = lenisInstance.scroll;
+        const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+
+        if (currentScroll >= maxScroll - 10) {
+          resetIdleTimer();
+          return;
+        }
+
+        // TODO: Video Section Integration
+        // Once real <video> elements are added to replace the videoNote placeholders in the
+        // recruiting brochure sections, check if a video is currently playing in the active viewport.
+        // If a video is playing, do not trigger this nudge; instead, wait and listen to the video's
+        // 'ended' event to resume/trigger auto-scroll.
+
+        const targetScroll = Math.min(currentScroll + window.innerHeight, maxScroll);
+
+        lenisInstance.scrollTo(targetScroll, {
+          duration: 1.5,
+          easing: (t: number) => (t === 1 ? 1 : 1 - Math.pow(2, -10 * t)),
+        });
+
+        // Reset timer after executing nudge to check for next idle period
+        resetIdleTimer();
+      }, 9000); // 9 seconds of zero activity
+    };
+
+    const handleActivity = () => {
+      resetIdleTimer();
+    };
+
+    // Listen to standard interaction events
+    window.addEventListener("mousemove", handleActivity);
+    window.addEventListener("mousedown", handleActivity);
+    window.addEventListener("keydown", handleActivity);
+    window.addEventListener("wheel", handleActivity);
+    window.addEventListener("touchmove", handleActivity);
+
+    // Listen to Lenis scroll events as well
+    lenisInstance.on("scroll", handleActivity);
+
+    // Start timer on mount
+    resetIdleTimer();
+
+    return () => {
+      if (idleTimeout) {
+        clearTimeout(idleTimeout);
+      }
+      window.removeEventListener("mousemove", handleActivity);
+      window.removeEventListener("mousedown", handleActivity);
+      window.removeEventListener("keydown", handleActivity);
+      window.removeEventListener("wheel", handleActivity);
+      window.removeEventListener("touchmove", handleActivity);
+      lenisInstance.off("scroll", handleActivity);
+    };
+  }, [lenisInstance, prefersReducedMotion]);
+
   return (
     <div className="relative bg-lp-bg font-body">
       {/* Hide standard cursor only on non-touch devices where custom cursor is active */}
