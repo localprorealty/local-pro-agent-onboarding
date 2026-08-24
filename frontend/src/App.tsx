@@ -63,8 +63,11 @@ export default function App() {
 
   useEffect(() => {
     return scrollYProgress.onChange((latest) => {
-      if (latest > 0.05) {
+      // Hide only when reaching the end of the page (95% or more scroll progress)
+      if (latest > 0.95) {
         setHideScrollCue(true);
+      } else {
+        setHideScrollCue(false);
       }
     });
   }, [scrollYProgress]);
