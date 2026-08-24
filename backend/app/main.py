@@ -20,7 +20,7 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Setup CORS Middleware
+# Setup CORS Middleware (reloaded configuration)
 if settings:
     origins = settings.cors_origins_list
 else:

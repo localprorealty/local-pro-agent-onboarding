@@ -33,24 +33,43 @@ export function AddressAutofillDemo({
   
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Address search query debounced fetch
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  // Address search query debounced fetch with AbortController and 500ms delay / 4-character threshold
   useEffect(() => {
-    if (query.trim().length < 3) {
+    if (query.trim().length < 4) {
       setSuggestions([]);
       setNoSuggestionsFound(false);
+      setLoadingSuggestions(false);
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+        abortControllerRef.current = null;
+      }
       return;
     }
 
     if (selectedAddress && query === selectedAddress.fullAddress) {
+      setLoadingSuggestions(false);
       return;
     }
 
+    // Set loading indicator in flight
+    setLoadingSuggestions(true);
+    setNoSuggestionsFound(false);
+
     const timer = setTimeout(async () => {
-      setLoadingSuggestions(true);
-      setNoSuggestionsFound(false);
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
+
       try {
         const apiBase = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000";
-        const res = await fetch(`${apiBase}/address-suggest?q=${encodeURIComponent(query)}`);
+        const res = await fetch(`${apiBase}/address-suggest?q=${encodeURIComponent(query)}`, {
+          signal: controller.signal,
+        });
         if (!res.ok) throw new Error("Autosuggest request failed");
         
         const resData = await res.json();
@@ -59,15 +78,23 @@ export function AddressAutofillDemo({
         if (items.length === 0) {
           setNoSuggestionsFound(true);
         }
-      } catch (err) {
+      } catch (err: any) {
+        if (err.name === "AbortError") {
+          return;
+        }
         console.error("Autosuggest fetch error:", err);
         setSuggestions([]);
       } finally {
-        setLoadingSuggestions(false);
+        if (abortControllerRef.current === controller) {
+          abortControllerRef.current = null;
+          setLoadingSuggestions(false);
+        }
       }
-    }, 300);
+    }, 500);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+    };
   }, [query, selectedAddress]);
 
   // Click outside suggestion dropdown logic
@@ -187,25 +214,43 @@ export function AddressAutofillDemo({
                 Search US Address
               </label>
               
-              <input
-                id="address-autocomplete"
-                type="text"
-                autoComplete="off"
-                placeholder="Start typing a US address..."
-                value={query}
-                onChange={(e) => {
-                  setQuery(e.target.value);
-                  if (selectedAddress && e.target.value !== selectedAddress.fullAddress) {
-                    setSelectedAddress(null);
-                    setLoadedData(null);
-                    setSharedMlsData(null);
-                    setRevealIndex(-1);
-                    setErrorMsg(null);
-                  }
-                }}
-                className="bg-lp-card border border-lp-border rounded-lg px-4 py-2.5 text-sm text-lp-smoke focus:border-lp-gold outline-none w-full transition-colors"
-                disabled={loading}
-              />
+              <div className="relative w-full">
+                <input
+                  id="address-autocomplete"
+                  type="text"
+                  autoComplete="off"
+                  placeholder="Start typing a US address..."
+                  value={query}
+                  onChange={(e) => {
+                    setQuery(e.target.value);
+                    if (selectedAddress && e.target.value !== selectedAddress.fullAddress) {
+                      setSelectedAddress(null);
+                      setLoadedData(null);
+                      setSharedMlsData(null);
+                      setRevealIndex(-1);
+                      setErrorMsg(null);
+                    }
+                  }}
+                  className="bg-lp-card border border-lp-border rounded-lg px-4 py-2.5 text-sm text-lp-smoke focus:border-lp-gold outline-none w-full transition-colors"
+                  disabled={loading}
+                />
+                
+                {loadingSuggestions && (
+                  <div className="absolute bottom-[2px] left-[2px] right-[2px] h-[2px] overflow-hidden rounded-b-lg pointer-events-none">
+                    <motion.div
+                      animate={{
+                        x: ["-100%", "100%"]
+                      }}
+                      transition={{
+                        repeat: Infinity,
+                        duration: 1.2,
+                        ease: "easeInOut"
+                      }}
+                      className="w-1/2 h-full bg-lp-gold"
+                    />
+                  </div>
+                )}
+              </div>
 
               {/* Suggestions Dropdown */}
               {(loadingSuggestions || suggestions.length > 0 || noSuggestionsFound) && (
