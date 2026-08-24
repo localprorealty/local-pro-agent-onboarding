@@ -1,0 +1,43 @@
+@import "tailwindcss";
+
+@theme {
+  /* Brand palette — matches LocalPRO Hub + North's character bible */
+  --color-lp-bg: #0a0a0a;
+  --color-lp-bg-raised: #141412;
+  --color-lp-card: #1a1a1a;
+  --color-lp-border: #2a2a2a;
+  --color-lp-gold: #cfb87c;
+  --color-lp-grey: #8a8a85;
+  --color-lp-smoke: #f2f2f2;
+
+  --font-display: 'Montserrat', sans-serif;
+  --font-body: 'Public Sans', sans-serif;
+  --font-north: 'Poppins', sans-serif;
+}
+
+html {
+  scroll-behavior: auto; /* Lenis takes over smooth scrolling */
+}
+
+body {
+  background: var(--color-lp-bg);
+  color: var(--color-lp-smoke);
+  font-family: var(--font-body);
+  overflow-x: hidden;
+}
+
+/* Respect reduced-motion preference site-wide */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Visible keyboard focus, required across the site */
+:focus-visible {
+  outline: 2px solid var(--color-lp-gold);
+  outline-offset: 3px;
+}
