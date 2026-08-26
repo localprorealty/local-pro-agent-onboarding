@@ -8,7 +8,20 @@ interface ExtensionFillDemoProps {
   sharedMlsData: any | null;
 }
 
+const SAMPLE_LISTING = {
+  "Property Type": "Single Family Home",
+  Bedrooms: "4",
+  Bathrooms: "3.5",
+  "Square Footage": "3,250 sqft",
+  "Lot Size": "0.34 acres",
+  "Year Built": "2018",
+  "List Price": "$675,000",
+  "Estimated List Price": "$675,000",
+};
+
 export function ExtensionFillDemo({ data, sharedMlsData }: ExtensionFillDemoProps) {
+  const [activeProperty, setActiveProperty] = useState<any | null>(null);
+
   // Autofill states for fields
   const [propertySubType, setPropertySubType] = useState("");
   const [housingType, setHousingType] = useState<string[]>([]);
@@ -21,8 +34,15 @@ export function ExtensionFillDemo({ data, sharedMlsData }: ExtensionFillDemoProp
   const [autofillProgress, setAutofillProgress] = useState<"idle" | "running" | "completed">("idle");
   const [autofillMessage, setAutofillMessage] = useState("");
 
+  // Sync with shared MLS state if looked up
   useEffect(() => {
-    if (!sharedMlsData) {
+    if (sharedMlsData) {
+      setActiveProperty(sharedMlsData);
+    }
+  }, [sharedMlsData]);
+
+  useEffect(() => {
+    if (!activeProperty) {
       // Reset form if data is cleared
       setPropertySubType("");
       setHousingType([]);
@@ -49,13 +69,13 @@ export function ExtensionFillDemo({ data, sharedMlsData }: ExtensionFillDemoProp
       // Delay 1: Property Sub Type
       await new Promise((r) => setTimeout(r, 600));
       setAutofillMessage("Autofilling Property Sub Type...");
-      setPropertySubType(sharedMlsData["Property Type"] || "Single Family Residence");
+      setPropertySubType(activeProperty["Property Type"] || "Single Family Residence");
       flash("propertySubType");
 
       // Delay 2: Housing Type checkbox
       await new Promise((r) => setTimeout(r, 600));
       setAutofillMessage("Checking housing classification...");
-      const ptype = (sharedMlsData["Property Type"] || "").toLowerCase();
+      const ptype = (activeProperty["Property Type"] || "").toLowerCase();
       if (ptype.includes("condo") || ptype.includes("townhouse")) {
         setHousingType(["Townhouse", "Condo"]);
       } else {
@@ -66,20 +86,20 @@ export function ExtensionFillDemo({ data, sharedMlsData }: ExtensionFillDemoProp
       // Delay 3: Year Built
       await new Promise((r) => setTimeout(r, 600));
       setAutofillMessage("Writing Year Built...");
-      setYearBuilt(sharedMlsData["Year Built"] || "N/A");
+      setYearBuilt(activeProperty["Year Built"] || "N/A");
       flash("yearBuilt");
 
       // Delay 4: Living Area SqFt
       await new Promise((r) => setTimeout(r, 600));
       setAutofillMessage("Writing living area SqFt...");
-      const rawSqFt = sharedMlsData["Square Footage"] || "";
+      const rawSqFt = activeProperty["Square Footage"] || "";
       setLivingArea(rawSqFt.replace(/ sqft/gi, ""));
       flash("livingArea");
 
       // Delay 5: List Price
       await new Promise((r) => setTimeout(r, 600));
       setAutofillMessage("Setting Listing Price...");
-      setListPrice(sharedMlsData["Estimated List Price"] || "");
+      setListPrice(activeProperty["Estimated List Price"] || activeProperty["List Price"] || "");
       flash("listPrice");
 
       // Finished
@@ -89,7 +109,7 @@ export function ExtensionFillDemo({ data, sharedMlsData }: ExtensionFillDemoProp
     };
 
     runSequence();
-  }, [sharedMlsData]);
+  }, [activeProperty]);
 
   const isFlashing = (field: string) => !!activeFlashes[field];
 
@@ -310,24 +330,29 @@ export function ExtensionFillDemo({ data, sharedMlsData }: ExtensionFillDemoProp
             </div>
 
             {/* Empty Form / Standby Blur Overlay */}
-            {!sharedMlsData && (
-              <div className="absolute inset-0 bg-[#fcfdfd]/95 backdrop-blur-[2px] flex items-center justify-center p-6 text-center select-none z-20">
+            {!activeProperty && (
+              <div className="absolute inset-0 bg-[#fcfdfd]/95 backdrop-blur-[2px] flex items-center justify-center p-6 text-center select-none z-20 font-sans">
                 <div className="max-w-md flex flex-col items-center gap-3 bg-white border border-[#bdcddc] rounded-xl shadow-xl p-8">
                   <svg className="w-10 h-10 text-lp-gold/70 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
                   </svg>
                   <h4 className="font-display font-semibold text-base text-[#111111]">Extension Autofill Standby</h4>
                   <p className="text-xs text-[#555555] leading-relaxed">
-                    Select a geocoded address and click <strong className="text-lp-gold">"Pull Listing Details"</strong> in the MLS lookup simulator above. 
-                    Once a listing record is fetched, watch the LocalPRO extension automatically populate this Matrix input sheet field-by-field.
+                    No active MLS property detected. Look up an address in the demo section above, or load our sample listing to proceed.
                   </p>
+                  <button
+                    onClick={() => setActiveProperty(SAMPLE_LISTING)}
+                    className="mt-2 bg-lp-gold/15 text-lp-gold hover:bg-lp-gold/20 border border-lp-gold/30 rounded-lg px-4 py-2 text-xs font-semibold tracking-wide transition-all cursor-pointer font-sans"
+                  >
+                    Load Sample Listing
+                  </button>
                 </div>
               </div>
             )}
           </div>
 
           {/* Extension overlay progress hud (only visible when data is active) */}
-          {sharedMlsData && (
+          {activeProperty && (
             <div className={`px-4 py-2 border-t text-xs font-semibold font-body select-none flex items-center justify-between ${
               autofillProgress === "running" ? "bg-lp-gold/10 text-lp-gold border-lp-gold/20" :
               autofillProgress === "completed" ? "bg-green-500/10 text-green-400 border-green-500/20" :
