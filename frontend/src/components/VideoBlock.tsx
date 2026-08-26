@@ -8,6 +8,7 @@ interface VideoBlockProps {
 export function VideoBlock({ src, gatesScroll = false }: VideoBlockProps) {
   const [hasError, setHasError] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   // Pre-flight check to see if the video file exists before loading/displaying the player
@@ -25,6 +26,23 @@ export function VideoBlock({ src, gatesScroll = false }: VideoBlockProps) {
     verifyVideo();
   }, [src]);
 
+  // Synchronize state with video volume/mute properties
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const handleVolumeChange = () => {
+      setIsMuted(video.muted);
+    };
+
+    video.addEventListener("volumechange", handleVolumeChange);
+    setIsMuted(video.muted);
+
+    return () => {
+      video.removeEventListener("volumechange", handleVolumeChange);
+    };
+  }, []);
+
   if (hasError) {
     return null; // Render absolutely nothing, fallback seamlessly to just text
   }
@@ -34,6 +52,13 @@ export function VideoBlock({ src, gatesScroll = false }: VideoBlockProps) {
       videoRef.current.play()
         .then(() => setIsPlaying(true))
         .catch(() => setHasError(true));
+    }
+  };
+
+  const handleUnmuteClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (videoRef.current) {
+      videoRef.current.muted = false;
     }
   };
 
@@ -62,6 +87,36 @@ export function VideoBlock({ src, gatesScroll = false }: VideoBlockProps) {
         onEnded={() => setIsPlaying(false)}
         onError={() => setHasError(true)}
       />
+
+      {/* Floating Unmute Button */}
+      {isPlaying && isMuted && (
+        <button
+          onClick={handleUnmuteClick}
+          className="absolute top-4 right-4 z-30 bg-lp-bg/85 backdrop-blur-sm border border-lp-border px-3.5 py-2 rounded-full flex items-center gap-2 text-xs text-lp-smoke font-body shadow-xl hover:bg-lp-bg hover:scale-105 transition-all duration-300"
+        >
+          <svg
+            className="w-4 h-4 text-lp-gold animate-pulse"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"
+            />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"
+            />
+          </svg>
+          <span className="font-semibold tracking-wide">Tap for Sound</span>
+        </button>
+      )}
 
       <div
         onClick={handlePlayClick}
