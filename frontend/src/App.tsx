@@ -337,12 +337,28 @@ export default function App() {
       handleActivity();
     };
 
+    const handleVideoEnded = (e: Event) => {
+      const target = e.target as HTMLVideoElement;
+      if (
+        target &&
+        target.tagName === "VIDEO" &&
+        target.getAttribute("data-gates-scroll") === "true"
+      ) {
+        console.log("[AUTO-SCROLL] Gated video ended. Resuming creep immediately.");
+        if (idleTimeout) {
+          clearTimeout(idleTimeout);
+        }
+        startCreep();
+      }
+    };
+
     // Listen to standard interaction events
     window.addEventListener("mousemove", handleMouseMove);
     window.addEventListener("mousedown", handleActivity);
     window.addEventListener("keydown", handleActivity);
     window.addEventListener("wheel", handleActivity, { passive: true });
     window.addEventListener("touchmove", handleActivity, { passive: true });
+    window.addEventListener("ended", handleVideoEnded, true);
 
     // Start timer on mount
     resetIdleTimer();
@@ -357,6 +373,7 @@ export default function App() {
       window.removeEventListener("keydown", handleActivity);
       window.removeEventListener("wheel", handleActivity);
       window.removeEventListener("touchmove", handleActivity);
+      window.removeEventListener("ended", handleVideoEnded, true);
     };
   }, []);
 

@@ -4,6 +4,7 @@ import { SectionShell } from "@/components/SectionShell";
 import { EditorialHeader } from "@/components/EditorialHeader";
 import { Reveal } from "@/components/Reveal";
 import type { SectionData } from "@/data/content";
+import { VideoBlock } from "@/components/VideoBlock";
 
 interface ParsedAddress {
   line1: string;
@@ -200,8 +201,13 @@ export function AddressAutofillDemo({
         eyebrow={data.eyebrow}
         title={data.title}
         body={"body" in data ? data.body : undefined}
-        video={"video" in data ? data.video : undefined}
       />
+
+      {"video" in data && data.video && (
+        <div className="w-full flex justify-center mt-8">
+          <VideoBlock src={data.video.src} gatesScroll={data.video.gatesScroll} />
+        </div>
+      )}
 
       <Reveal delay={0.2}>
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 mt-12 items-start max-w-4xl mx-auto">

@@ -36,7 +36,7 @@ export function SectionRouter({ data, sharedMlsData, setSharedMlsData }: Section
       return <HeartSection data={data} />;
     case "built-for-next":
     case "close":
-      return <NarrativeSection data={data} align="center" />;
+      return <NarrativeSection data={data} align="left" />;
     case "form":
       return <FormSection data={data} />;
     default:

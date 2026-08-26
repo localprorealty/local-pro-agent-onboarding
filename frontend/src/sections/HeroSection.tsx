@@ -60,8 +60,12 @@ export function HeroSection({ data }: { data: SectionData }) {
           body={"body" in data ? data.body : undefined}
           sub={"sub" in data ? data.sub : undefined}
           videoNote={"videoNote" in data ? data.videoNote : undefined}
-          video={"video" in data ? data.video : undefined}
         />
+        {"video" in data && data.video && (
+          <div className="w-full flex justify-center mt-8">
+            <VideoBlock src={data.video.src} gatesScroll={data.video.gatesScroll} />
+          </div>
+        )}
       </SectionShell>
     );
   }

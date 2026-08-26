@@ -38,7 +38,7 @@ export function VideoBlock({ src, gatesScroll = false }: VideoBlockProps) {
   };
 
   return (
-    <div className="relative w-full max-w-xl aspect-video rounded-xl overflow-hidden border border-lp-border bg-lp-card shadow-lg group mt-6">
+    <div className="relative w-full max-w-4xl aspect-video rounded-xl overflow-hidden border border-lp-border bg-lp-card shadow-lg group mt-6">
       <video
         ref={videoRef}
         src={src}

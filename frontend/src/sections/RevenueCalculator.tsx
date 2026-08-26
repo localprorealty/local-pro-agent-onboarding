@@ -222,8 +222,11 @@ export function RevenueCalculator({ data }: { data: SectionData }) {
             {/* Ambient Background Glow behind total */}
             <div className="absolute -top-16 -right-16 w-40 h-40 rounded-full bg-lp-gold/5 blur-3xl pointer-events-none" />
             
-            <span className="text-xs font-semibold uppercase tracking-widest text-lp-grey">
+            <span className="text-xs font-semibold uppercase tracking-widest text-lp-grey inline-flex items-center gap-1">
               Estimated Annual Payout
+              <Tooltip text="The total projected revenue share you could earn annually, calculated as: referred agents × payout per agent.">
+                <span className="text-lp-gold select-none font-normal text-[11px] font-body bg-lp-gold/10 px-1 rounded hover:bg-lp-gold/20 transition-colors">ⓘ</span>
+              </Tooltip>
             </span>
             
             <div className="mt-4 text-5xl md:text-6xl font-display font-extrabold text-lp-gold leading-none">
@@ -232,11 +235,21 @@ export function RevenueCalculator({ data }: { data: SectionData }) {
 
             <div className="mt-6 flex flex-col gap-3 pt-6 border-t border-lp-border/60">
               <div className="flex justify-between items-center text-sm">
-                <span className="text-lp-grey">Qualifying Level</span>
+                <span className="text-lp-grey inline-flex items-center gap-1">
+                  Qualifying Level
+                  <Tooltip text="The tier (1–5) determined by your number of active referred agents, which determines the rate matrix used.">
+                    <span className="text-lp-gold select-none font-normal text-[11px] font-body bg-lp-gold/10 px-1 rounded hover:bg-lp-gold/20 transition-colors">ⓘ</span>
+                  </Tooltip>
+                </span>
                 <span className="text-lp-smoke font-medium">Tier {activeTier}</span>
               </div>
               <div className="flex justify-between items-center text-sm">
-                <span className="text-lp-grey">Payout Per Agent</span>
+                <span className="text-lp-grey inline-flex items-center gap-1">
+                  Payout Per Agent
+                  <Tooltip text="The calculated annual revenue share payout generated from a single referred agent based on their average cap percentage contribution.">
+                    <span className="text-lp-gold select-none font-normal text-[11px] font-body bg-lp-gold/10 px-1 rounded hover:bg-lp-gold/20 transition-colors">ⓘ</span>
+                  </Tooltip>
+                </span>
                 <span className="text-lp-gold font-semibold">
                   {payoutPerAgent.toLocaleString("en-US", {
                     style: "currency",
