@@ -167,8 +167,8 @@ export default function App() {
     const isCreepActiveRef = { current: false };
 
     const isUserInExclusionZone = () => {
-      // 1. Check if chat panel is open
-      const isChatOpen = !!document.querySelector('[aria-label="Chat with North"]');
+      // 1. Check if chat panel is open (only matches the dialog when active, not the persistent dock button)
+      const isChatOpen = !!document.querySelector('div[role="dialog"][aria-label="Chat with North"]');
       if (isChatOpen) {
         console.log("[AUTO-SCROLL] Exclusion triggered: chat panel is open");
         return true;
