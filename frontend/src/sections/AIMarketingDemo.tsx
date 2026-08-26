@@ -35,9 +35,9 @@ export function AIMarketingDemo({
   const [activeProperty, setActiveProperty] = useState<PropertyData | null>(null);
   const [notes, setNotes] = useState("");
   const [images, setImages] = useState<string[]>([
-    "/house-hero.png",
-    "/house-1.png",
-    "/house-2.png",
+    "/House-hero.jpg",
+    "/House-kitchen.jpg",
+    "/House-dining.jpg",
   ]);
   const [generating, setGenerating] = useState(false);
   const [result, setResult] = useState<{ description: string; socialCaption: string } | null>(null);
@@ -66,7 +66,7 @@ export function AIMarketingDemo({
     // Pad with defaults if less than 3 uploaded
     const filledUrls = [...urls];
     if (filledUrls.length < 3) {
-      const fallbacks = ["/house-hero.png", "/house-1.png", "/house-2.png"];
+      const fallbacks = ["/House-hero.jpg", "/House-kitchen.jpg", "/House-dining.jpg"];
       for (let i = filledUrls.length; i < 3; i++) {
         filledUrls.push(fallbacks[i]);
       }
@@ -287,8 +287,8 @@ export function AIMarketingDemo({
                     <div className="rounded-xl bg-lp-bg border border-lp-border/60 shadow-xl max-w-md mx-auto w-full overflow-hidden">
                       {/* Insta Header */}
                       <div className="p-3 flex items-center gap-2.5 border-b border-lp-border/40">
-                        <div className="w-7 h-7 rounded-full bg-lp-gold/20 border border-lp-gold/50 flex items-center justify-center text-[10px] font-bold text-lp-gold">
-                          LP
+                        <div className="w-7 h-7 rounded-full border border-lp-gold/50 overflow-hidden flex items-center justify-center">
+                          <img src="/House-agent.jpg" alt="LocalPRO Agent" className="w-full h-full object-cover" />
                         </div>
                         <div className="flex flex-col">
                           <span className="text-[11px] font-bold text-lp-smoke">localpro.realty</span>
