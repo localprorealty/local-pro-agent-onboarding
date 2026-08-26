@@ -16,7 +16,6 @@ export default function App() {
   const [lenisInstance, setLenisInstance] = useState<any | null>(null);
   const lenisRef = useRef<any>(null);
   const prefersReducedMotionRef = useRef(false);
-  const isAutoScrollingRef = useRef(false);
 
   useEffect(() => {
     lenisRef.current = lenisInstance;
@@ -161,8 +160,10 @@ export default function App() {
   // Gentle auto-advance for users who stop interacting for an extended period
   useEffect(() => {
     let idleTimeout: any = null;
+    let creepFrameId: number | null = null;
     let lastX = -1;
     let lastY = -1;
+    const isCreepActiveRef = { current: false };
 
     const isUserInExclusionZone = () => {
       // 1. Check if chat panel is open
@@ -196,80 +197,57 @@ export default function App() {
       return false;
     };
 
+    const creepScroll = () => {
+      if (!isCreepActiveRef.current) return;
+
+      const lenis = lenisRef.current;
+      const prefersReduced = prefersReducedMotionRef.current;
+
+      if (lenis && !prefersReduced && !isUserInExclusionZone()) {
+        const currentScroll = lenis.scroll;
+        const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+
+        if (currentScroll < maxScroll - 5) {
+          // Creep forward gently by 1px per frame (approx 60px/sec at 60fps)
+          lenis.scrollTo(currentScroll + 1.0, { immediate: true });
+        }
+      }
+
+      creepFrameId = requestAnimationFrame(creepScroll);
+    };
+
+    const startCreep = () => {
+      if (isCreepActiveRef.current) return;
+      isCreepActiveRef.current = true;
+      console.log("[AUTO-SCROLL] Idle creep activated after 3 seconds");
+      creepScroll();
+    };
+
+    const stopCreep = () => {
+      if (isCreepActiveRef.current) {
+        isCreepActiveRef.current = false;
+        if (creepFrameId !== null) {
+          cancelAnimationFrame(creepFrameId);
+          creepFrameId = null;
+        }
+        console.log("[AUTO-SCROLL] Idle creep deactivated due to user interaction");
+      }
+    };
+
     const resetIdleTimer = () => {
+      stopCreep();
+
       if (idleTimeout) {
         clearTimeout(idleTimeout);
       }
 
       idleTimeout = setTimeout(() => {
-        const lenis = lenisRef.current;
-        const prefersReduced = prefersReducedMotionRef.current;
-
-        console.log("[AUTO-SCROLL] Idle timeout triggered. Checking status...");
-
-        if (!lenis) {
-          console.log("[AUTO-SCROLL] Idle timeout aborted: lenisInstance is null");
-          resetIdleTimer();
-          return;
-        }
-
-        if (prefersReduced) {
-          console.log("[AUTO-SCROLL] Idle timeout aborted: prefers-reduced-motion is active");
-          resetIdleTimer();
-          return;
-        }
-
-        if (isUserInExclusionZone()) {
-          console.log("[AUTO-SCROLL] Idle timeout aborted: user is in exclusion zone");
-          resetIdleTimer();
-          return;
-        }
-
-        const currentScroll = lenis.scroll;
-        const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-
-        if (currentScroll >= maxScroll - 10) {
-          console.log("[AUTO-SCROLL] Idle timeout aborted: already at bottom of page");
-          resetIdleTimer();
-          return;
-        }
-
-        // Set auto scrolling state to true before starting animation
-        isAutoScrollingRef.current = true;
-        console.log("[AUTO-SCROLL] Nudge started from scroll offset", currentScroll);
-
-        // TODO: Video Section Integration
-        // Once real <video> elements are added to replace the videoNote placeholders in the
-        // recruiting brochure sections, check if a video is currently playing in the active viewport.
-        // If a video is playing, do not trigger this nudge; instead, wait and listen to the video's
-        // 'ended' event to resume/trigger auto-scroll.
-
-        const targetScroll = Math.min(currentScroll + window.innerHeight, maxScroll);
-
-        lenis.scrollTo(targetScroll, {
-          duration: 1.5,
-          easing: (t: number) => (t === 1 ? 1 : 1 - Math.pow(2, -10 * t)),
-          onComplete: () => {
-            isAutoScrollingRef.current = false;
-            console.log("[AUTO-SCROLL] Nudge animation completed at scroll offset", lenis.scroll);
-            resetIdleTimer();
-          }
-        });
-      }, 9000); // 9 seconds of zero activity
-      console.log("[AUTO-SCROLL] Timer registered for 9 seconds");
+        startCreep();
+      }, 3000); // 3 seconds delay
+      console.log("[AUTO-SCROLL] Timer registered for 3 seconds of idle time");
     };
 
     const handleActivity = () => {
-      if (isAutoScrollingRef.current) {
-        // If the user scrolls, clicks, or interacts during the nudge, cancel it immediately
-        isAutoScrollingRef.current = false;
-        const lenis = lenisRef.current;
-        if (lenis) {
-          lenis.stop();
-          lenis.start();
-        }
-        console.log("[AUTO-SCROLL] Nudge animation cancelled by user interaction!");
-      }
       resetIdleTimer();
     };
 
@@ -292,6 +270,7 @@ export default function App() {
     resetIdleTimer();
 
     return () => {
+      stopCreep();
       if (idleTimeout) {
         clearTimeout(idleTimeout);
       }
