@@ -23,7 +23,7 @@ export function HeroSection({ data }: { data: SectionData }) {
   });
 
   // 1. Logo Reveal (0 - 18%)
-  const logoOpacity = useTransform(scrollYProgress, [0, 0.05, 0.12, 0.2], [0, 1, 1, 0]);
+  const logoOpacity = useTransform(scrollYProgress, [0, 0.05, 0.12, 0.2], [0.02, 1, 1, 0]);
   const logoScale = useTransform(scrollYProgress, [0.12, 0.2], [1, 0.85]);
   const logoY = useTransform(scrollYProgress, [0.12, 0.2], [0, -30]);
 
