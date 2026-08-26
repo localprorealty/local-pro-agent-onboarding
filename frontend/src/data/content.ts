@@ -12,7 +12,6 @@ export const SECTIONS = [
     title: "A brokerage should multiply what you do well.",
     body: "Performance during the transaction. Continuity after the closing.",
     sub: "Produce the opportunity. Serve the transaction. Compound the relationship.",
-    videoNote: "[[Deana — opening bookend, ~8–10s]]",
     video: { src: "/videos/clip1-open.mov", gatesScroll: true },
   },
   {

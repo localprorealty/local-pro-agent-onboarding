@@ -50,6 +50,15 @@ export function HeroSection({ data }: { data: SectionData }) {
   const videoNoteOpacity = useTransform(scrollYProgress, [0.7, 0.9], [0, 1]);
   const videoNoteY = useTransform(scrollYProgress, [0.7, 0.9], [20, 0]);
 
+  // Text container translates up and fades out slightly to make room for video to center
+  const textY = useTransform(scrollYProgress, [0.45, 0.75], [0, -180]);
+  const textOpacity = useTransform(scrollYProgress, [0.45, 0.75], [1, 0.15]);
+
+  // Video transitions: starts invisible and translated down, then fades in and centers
+  const videoOpacity = useTransform(scrollYProgress, [0.55, 0.8], [0, 1]);
+  const videoY = useTransform(scrollYProgress, [0.55, 0.8], [150, 0]);
+  const videoScale = useTransform(scrollYProgress, [0.55, 0.8], [0.95, 1]);
+
   if (prefersReducedMotion) {
     return (
       <SectionShell id={data.id}>
@@ -92,45 +101,50 @@ export function HeroSection({ data }: { data: SectionData }) {
 
         {/* Content Container */}
         <div className="w-full max-w-3xl mx-auto flex flex-col items-center text-center gap-6 relative z-10">
-          {/* Eyebrow */}
-          <motion.p
-            style={{ opacity: eyebrowOpacity }}
-            className="text-xs uppercase tracking-[0.2em] text-lp-gold font-body"
+          <motion.div
+            style={{ y: textY, opacity: textOpacity }}
+            className="flex flex-col items-center text-center gap-6 w-full"
           >
-            {data.eyebrow}
-          </motion.p>
-
-          {/* Title (Headline) */}
-          <motion.h2
-            style={{
-              scale: titleScale,
-              opacity: titleOpacity,
-              filter: useTransform(titleBlur, (b) => `blur(${b}px)`),
-            }}
-            className="font-display font-bold text-3xl md:text-5xl leading-tight text-lp-smoke max-w-2xl"
-          >
-            {data.title}
-          </motion.h2>
-
-          {/* Body */}
-          {"body" in data && (
+            {/* Eyebrow */}
             <motion.p
-              style={{ opacity: bodyOpacity, y: bodyY }}
-              className="text-base md:text-lg text-lp-grey max-w-xl"
+              style={{ opacity: eyebrowOpacity }}
+              className="text-xs uppercase tracking-[0.2em] text-lp-gold font-body"
             >
-              {data.body}
+              {data.eyebrow}
             </motion.p>
-          )}
 
-          {/* Sub Copy */}
-          {"sub" in data && (
-            <motion.p
-              style={{ opacity: subOpacity, y: subY }}
-              className="text-sm text-lp-grey/80 max-w-xl"
+            {/* Title (Headline) */}
+            <motion.h2
+              style={{
+                scale: titleScale,
+                opacity: titleOpacity,
+                filter: useTransform(titleBlur, (b) => `blur(${b}px)`),
+              }}
+              className="font-display font-bold text-3xl md:text-5xl leading-tight text-lp-smoke max-w-2xl"
             >
-              {data.sub}
-            </motion.p>
-          )}
+              {data.title}
+            </motion.h2>
+
+            {/* Body */}
+            {"body" in data && (
+              <motion.p
+                style={{ opacity: bodyOpacity, y: bodyY }}
+                className="text-base md:text-lg text-lp-grey max-w-xl"
+              >
+                {data.body}
+              </motion.p>
+            )}
+
+            {/* Sub Copy */}
+            {"sub" in data && (
+              <motion.p
+                style={{ opacity: subOpacity, y: subY }}
+                className="text-sm text-lp-grey/80 max-w-xl"
+              >
+                {data.sub}
+              </motion.p>
+            )}
+          </motion.div>
 
           {/* VideoNote */}
           {"videoNote" in data && (
@@ -141,17 +155,21 @@ export function HeroSection({ data }: { data: SectionData }) {
               {data.videoNote}
             </motion.div>
           )}
-
-          {/* Video */}
-          {"video" in data && data.video && (
-            <motion.div
-              style={{ opacity: videoNoteOpacity, y: videoNoteY }}
-              className="w-full flex justify-center mt-4"
-            >
-              <VideoBlock src={data.video.src} gatesScroll={data.video.gatesScroll} />
-            </motion.div>
-          )}
         </div>
+
+        {/* Video */}
+        {"video" in data && data.video && (
+          <motion.div
+            style={{
+              opacity: videoOpacity,
+              y: videoY,
+              scale: videoScale,
+            }}
+            className="absolute max-w-4xl w-full px-6 z-10 mt-16"
+          >
+            <VideoBlock src={data.video.src} gatesScroll={data.video.gatesScroll} />
+          </motion.div>
+        )}
       </div>
     </section>
   );

@@ -361,8 +361,10 @@ export default function App() {
           const videoCenter = rect.top + rect.height / 2;
           const viewportCenter = vh / 2;
           
-          if (Math.abs(videoCenter - viewportCenter) < 120) {
-            console.log("[AUTO-SCROLL] Gated video centered. Autoplay triggered!");
+          const computedOpacity = parseFloat(window.getComputedStyle(video).opacity || "1");
+          
+          if (Math.abs(videoCenter - viewportCenter) < 120 && computedOpacity > 0.8) {
+            console.log("[AUTO-SCROLL] Gated video centered and visible. Autoplay triggered!");
             
             // Stop scroll
             if (isCreepActiveRef.current) {
