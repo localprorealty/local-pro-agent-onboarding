@@ -13,7 +13,7 @@ export const SECTIONS = [
     body: "Performance during the transaction. Continuity after the closing.",
     sub: "Produce the opportunity. Serve the transaction. Compound the relationship.",
     videoNote: "[[Deana — opening bookend, ~8–10s]]",
-    video: { src: "/videos/clip1-open.mp4", gatesScroll: true },
+    video: { src: "/videos/clip1-open.mov", gatesScroll: true },
   },
   {
     id: "hidden-weight",

@@ -352,6 +352,41 @@ export default function App() {
       }
     };
 
+    const checkGatedVideoAutoplay = () => {
+      const gatedVideos = document.querySelectorAll('video[data-gates-scroll="true"]');
+      for (const video of Array.from(gatedVideos) as HTMLVideoElement[]) {
+        if (video.paused && !video.ended) {
+          const rect = video.getBoundingClientRect();
+          const vh = window.innerHeight;
+          const videoCenter = rect.top + rect.height / 2;
+          const viewportCenter = vh / 2;
+          
+          if (Math.abs(videoCenter - viewportCenter) < 120) {
+            console.log("[AUTO-SCROLL] Gated video centered. Autoplay triggered!");
+            
+            // Stop scroll
+            if (isCreepActiveRef.current) {
+              isCreepActiveRef.current = false;
+              if (creepFrameId !== null) {
+                clearTimeout(creepFrameId);
+                creepFrameId = null;
+              }
+              const lenis = lenisRef.current;
+              if (lenis) {
+                lenis.stop();
+                lenis.start();
+              }
+            }
+            
+            video.play().catch((err) => {
+              console.log("[AUTO-SCROLL] Autoplay failed:", err);
+            });
+            break;
+          }
+        }
+      }
+    };
+
     // Listen to standard interaction events
     window.addEventListener("mousemove", handleMouseMove);
     window.addEventListener("mousedown", handleActivity);
@@ -359,6 +394,7 @@ export default function App() {
     window.addEventListener("wheel", handleActivity, { passive: true });
     window.addEventListener("touchmove", handleActivity, { passive: true });
     window.addEventListener("ended", handleVideoEnded, true);
+    window.addEventListener("scroll", checkGatedVideoAutoplay, { passive: true });
 
     // Start timer on mount
     resetIdleTimer();
@@ -374,6 +410,7 @@ export default function App() {
       window.removeEventListener("wheel", handleActivity);
       window.removeEventListener("touchmove", handleActivity);
       window.removeEventListener("ended", handleVideoEnded, true);
+      window.removeEventListener("scroll", checkGatedVideoAutoplay);
     };
   }, []);
 
