@@ -299,7 +299,7 @@ export default function App() {
             isUserInExclusionZone: isExcl
           });
           if (lenis) {
-            lenis.scrollTo(lenis.scroll + 300, { immediate: true });
+            lenis.scrollTo(lenis.scroll + 5, { immediate: true });
           }
         }}
         className="fixed top-4 left-4 z-[99999] px-3 py-2 bg-lp-gold text-lp-bg font-semibold text-xs rounded shadow-lg hover:bg-lp-gold/90 transition-colors cursor-pointer select-none"
