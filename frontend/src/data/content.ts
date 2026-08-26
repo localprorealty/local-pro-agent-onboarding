@@ -32,7 +32,10 @@ export const SECTIONS = [
     title: "Watch what happens when a listing comes in.",
     body: "Every brokerage will tell you they have technology, marketing, training, and support. At LocalPRO, we actually built those pieces to work together, so you're not juggling five separate logins on your own. Easiest to just show you: type a real address below and watch something that normally takes an hour of manual entry happen in seconds.",
     demo: "address-autofill",
-    video: { src: "/videos/clip2-platform.mp4", gatesScroll: true },
+    video: [
+      { src: "/videos/clip2-open.mov", gatesScroll: true },
+      { src: "/videos/clip2b-platform.mov", gatesScroll: true },
+    ],
   },
   {
     id: "ai-marketing",

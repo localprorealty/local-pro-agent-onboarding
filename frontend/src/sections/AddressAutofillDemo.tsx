@@ -204,8 +204,14 @@ export function AddressAutofillDemo({
       />
 
       {"video" in data && data.video && (
-        <div className="w-full flex justify-center mt-8">
-          <VideoBlock src={data.video.src} gatesScroll={data.video.gatesScroll} />
+        <div className="w-full flex flex-col items-center gap-6 mt-8">
+          {Array.isArray(data.video) ? (
+            data.video.map((v, i) => (
+              <VideoBlock key={i} src={v.src} gatesScroll={v.gatesScroll} />
+            ))
+          ) : (
+            <VideoBlock src={(data.video as any).src} gatesScroll={(data.video as any).gatesScroll} />
+          )}
         </div>
       )}
 

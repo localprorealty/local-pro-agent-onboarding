@@ -69,7 +69,11 @@ export function HeroSection({ data }: { data: SectionData }) {
         />
         {"video" in data && data.video && (
           <div className="w-full flex justify-center mt-8">
-            <VideoBlock src={data.video.src} gatesScroll={data.video.gatesScroll} />
+            {Array.isArray(data.video) ? (
+              <VideoBlock src={data.video[0].src} gatesScroll={data.video[0].gatesScroll} />
+            ) : (
+              <VideoBlock src={(data.video as any).src} gatesScroll={(data.video as any).gatesScroll} />
+            )}
           </div>
         )}
       </SectionShell>
@@ -164,7 +168,11 @@ export function HeroSection({ data }: { data: SectionData }) {
             }}
             className="absolute max-w-4xl w-full px-6 z-20 hero-video-wrapper"
           >
-            <VideoBlock src={data.video.src} gatesScroll={data.video.gatesScroll} />
+            {Array.isArray(data.video) ? (
+              <VideoBlock src={data.video[0].src} gatesScroll={data.video[0].gatesScroll} />
+            ) : (
+              <VideoBlock src={(data.video as any).src} gatesScroll={(data.video as any).gatesScroll} />
+            )}
           </motion.div>
         )}
       </div>
