@@ -184,21 +184,7 @@ export default function App() {
         return true;
       }
 
-      // 3. Check if any exclusion section is visible in the viewport
-      const exclusionIds = ["revenue-calculator", "platform-demo", "ai-marketing", "form", "close"];
-      for (const id of exclusionIds) {
-        const el = document.getElementById(id);
-        if (el) {
-          const rect = el.getBoundingClientRect();
-          const vh = window.innerHeight;
-          // Visible if overlapping with the viewport
-          const isVisible = rect.top < vh - 20 && rect.bottom > 20;
-          if (isVisible) {
-            console.log(`[AUTO-SCROLL] Paused: Exclusion section #${id} is visible in viewport`);
-            return true;
-          }
-        }
-      }
+
 
       // 4. Check if any gatesScroll video is currently playing
       const playingGatedVideos = document.querySelectorAll('video[data-gates-scroll="true"]');
