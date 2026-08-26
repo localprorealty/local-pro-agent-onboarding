@@ -16,7 +16,6 @@ export default function App() {
   const [lenisInstance, setLenisInstance] = useState<any | null>(null);
   const lenisRef = useRef<any>(null);
   const prefersReducedMotionRef = useRef(false);
-  const isUserInExclusionZoneRef = useRef<() => boolean>(() => false);
 
   useEffect(() => {
     lenisRef.current = lenisInstance;
@@ -169,10 +168,7 @@ export default function App() {
     const isUserInExclusionZone = () => {
       // 1. Check if chat panel is open (only matches the dialog when active, not the persistent dock button)
       const isChatOpen = !!document.querySelector('div[role="dialog"][aria-label="Chat with North"]');
-      if (isChatOpen) {
-        console.log("[AUTO-SCROLL] Exclusion triggered: chat panel is open");
-        return true;
-      }
+      if (isChatOpen) return true;
 
       // 2. Check if any input or interactive element is focused inside these sections
       const active = document.activeElement;
@@ -180,7 +176,6 @@ export default function App() {
         active &&
         active.closest("#revenue-calculator, #platform-demo, #ai-marketing, #form, #close")
       ) {
-        console.log("[AUTO-SCROLL] Exclusion triggered: focused element in zone:", active);
         return true;
       }
 
@@ -193,23 +188,12 @@ export default function App() {
           const vh = window.innerHeight;
           // Visible if overlapping with the viewport
           const isVisible = rect.top < vh - 20 && rect.bottom > 20;
-          console.log(`[AUTO-SCROLL] id=${id} check:`, {
-            rectTop: Math.round(rect.top),
-            rectBottom: Math.round(rect.bottom),
-            vh,
-            isVisible
-          });
-          if (isVisible) {
-            console.log(`[AUTO-SCROLL] Exclusion triggered: section #${id} is visible`);
-            return true;
-          }
+          if (isVisible) return true;
         }
       }
 
       return false;
     };
-
-    isUserInExclusionZoneRef.current = isUserInExclusionZone;
 
     const creepScroll = () => {
       if (!isCreepActiveRef.current) return;
@@ -218,41 +202,26 @@ export default function App() {
       const prefersReduced = prefersReducedMotionRef.current;
       const isExcl = isUserInExclusionZone();
 
-      console.log("[AUTO-SCROLL] creepScroll check:", {
-        isCreepActive: isCreepActiveRef.current,
-        hasLenis: !!lenis,
-        prefersReduced,
-        isUserInExclusionZone: isExcl
-      });
-
       if (lenis && !prefersReduced && !isExcl) {
         const currentScroll = lenis.scroll;
         const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
 
-        console.log("[AUTO-SCROLL] Executing lenis.scrollTo:", {
-          from: currentScroll,
-          to: currentScroll + 80
-        });
-
         if (currentScroll < maxScroll - 5) {
-          // Linear scroll by 80px over 2 seconds (40px/sec) for absolute smooth motion
-          lenis.scrollTo(currentScroll + 80, {
+          // Linear scroll by 250px over 2 seconds for absolute smooth motion
+          lenis.scrollTo(currentScroll + 250, {
             duration: 2.0,
             easing: (t: number) => t, // Linear easing
             onComplete: () => {
-              console.log("[AUTO-SCROLL] lenis.scrollTo step completed");
               if (isCreepActiveRef.current) {
                 creepScroll();
               }
             }
           });
         } else {
-          console.log("[AUTO-SCROLL] Reached max scroll, stopping creep");
           stopCreep();
         }
       } else {
         // If paused due to exclusion zone, check again in 500ms
-        console.log("[AUTO-SCROLL] Creep paused/aborted due to check failure, scheduling retry in 500ms");
         creepFrameId = window.setTimeout(() => {
           if (isCreepActiveRef.current) {
             creepScroll();
@@ -264,7 +233,6 @@ export default function App() {
     const startCreep = () => {
       if (isCreepActiveRef.current) return;
       isCreepActiveRef.current = true;
-      console.log("[AUTO-SCROLL] Idle creep activated after 3 seconds");
       creepScroll();
     };
 
@@ -281,7 +249,6 @@ export default function App() {
           lenis.stop();
           lenis.start();
         }
-        console.log("[AUTO-SCROLL] Idle creep deactivated due to user interaction");
       }
     };
 
@@ -295,7 +262,6 @@ export default function App() {
       idleTimeout = setTimeout(() => {
         startCreep();
       }, 3000); // 3 seconds delay
-      console.log("[AUTO-SCROLL] Timer registered for 3 seconds of idle time");
     };
 
     const handleActivity = () => {
@@ -335,26 +301,6 @@ export default function App() {
 
   return (
     <div className="relative bg-lp-bg font-body">
-      {/* TEST SCROLL — DEBUG BUTTON */}
-      <button
-        onClick={() => {
-          const lenis = lenisRef.current;
-          const isExcl = isUserInExclusionZoneRef.current();
-          console.log("[DEBUG-CLICK] live state:", {
-            lenisInstancePresent: !!lenis,
-            currentScrollValue: lenis ? lenis.scroll : null,
-            prefersReducedMotion: prefersReducedMotionRef.current,
-            isUserInExclusionZone: isExcl
-          });
-          if (lenis) {
-            lenis.scrollTo(lenis.scroll + 25, { immediate: true });
-          }
-        }}
-        className="fixed top-4 left-4 z-[99999] px-3 py-2 bg-lp-gold text-lp-bg font-semibold text-xs rounded shadow-lg hover:bg-lp-gold/90 transition-colors cursor-pointer select-none"
-      >
-        TEST SCROLL — DEBUG
-      </button>
-
       {/* Hide standard cursor only on non-touch devices where custom cursor is active */}
       {showCursor && (
         <style>{`
