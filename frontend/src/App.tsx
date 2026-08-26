@@ -356,6 +356,18 @@ export default function App() {
       const gatedVideos = document.querySelectorAll('video[data-gates-scroll="true"]');
       for (const video of Array.from(gatedVideos) as HTMLVideoElement[]) {
         if (video.paused && !video.ended) {
+          // If the video is inside the Hero section, check scroll progress to prevent premature autoplay
+          const heroSection = document.getElementById("open");
+          if (heroSection && video.closest('#open')) {
+            const rect = heroSection.getBoundingClientRect();
+            const maxScroll = rect.height - window.innerHeight;
+            const progress = maxScroll > 0 ? -rect.top / maxScroll : 0;
+            // Only autoplay when scroll progress is between 0.65 and 0.85
+            if (progress < 0.65 || progress > 0.85) {
+              continue;
+            }
+          }
+
           const rect = video.getBoundingClientRect();
           const vh = window.innerHeight;
           const videoCenter = rect.top + rect.height / 2;
