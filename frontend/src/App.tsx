@@ -16,6 +16,7 @@ export default function App() {
   const [lenisInstance, setLenisInstance] = useState<any | null>(null);
   const lenisRef = useRef<any>(null);
   const prefersReducedMotionRef = useRef(false);
+  const isUserInExclusionZoneRef = useRef<() => boolean>(() => false);
 
   useEffect(() => {
     lenisRef.current = lenisInstance;
@@ -197,6 +198,8 @@ export default function App() {
       return false;
     };
 
+    isUserInExclusionZoneRef.current = isUserInExclusionZone;
+
     const creepScroll = () => {
       if (!isCreepActiveRef.current) return;
 
@@ -284,6 +287,26 @@ export default function App() {
 
   return (
     <div className="relative bg-lp-bg font-body">
+      {/* TEST SCROLL — DEBUG BUTTON */}
+      <button
+        onClick={() => {
+          const lenis = lenisRef.current;
+          const isExcl = isUserInExclusionZoneRef.current();
+          console.log("[DEBUG-CLICK] live state:", {
+            lenisInstancePresent: !!lenis,
+            currentScrollValue: lenis ? lenis.scroll : null,
+            prefersReducedMotion: prefersReducedMotionRef.current,
+            isUserInExclusionZone: isExcl
+          });
+          if (lenis) {
+            lenis.scrollTo(lenis.scroll + 300, { immediate: true });
+          }
+        }}
+        className="fixed top-4 left-4 z-[99999] px-3 py-2 bg-lp-gold text-lp-bg font-semibold text-xs rounded shadow-lg hover:bg-lp-gold/90 transition-colors cursor-pointer select-none"
+      >
+        TEST SCROLL — DEBUG
+      </button>
+
       {/* Hide standard cursor only on non-touch devices where custom cursor is active */}
       {showCursor && (
         <style>{`
