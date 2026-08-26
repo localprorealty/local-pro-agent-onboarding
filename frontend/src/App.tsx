@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useMotionValue, useSpring, motion, useScroll, AnimatePresence } from "framer-motion";
 import { useLenis } from "@/lib/useLenis";
-import { SECTIONS } from "@/data/content";
+import { SECTIONS, type SectionData } from "@/data/content";
 import { SectionRouter } from "@/sections/SectionRouter";
 import { NorthDock } from "@/components/NorthDock/NorthDock";
 import { ScrollProgress } from "@/components/ScrollProgress";
@@ -209,8 +209,11 @@ export default function App() {
         const currentScroll = lenis.scroll;
         const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
 
-        // Determine active section to read creepSpeedMultiplier
+        // Determine active section, its height, and creepSpeedMultiplier
         let activeMultiplier = 1.0;
+        let sectionHeight = window.innerHeight; // Default fallback to 1 vh
+        let activeSection: SectionData = SECTIONS[0];
+
         for (const section of SECTIONS) {
           const el = document.getElementById(section.id);
           if (el) {
@@ -219,15 +222,45 @@ export default function App() {
             // If the section occupies the center of the viewport
             if (rect.top <= vh / 2 && rect.bottom >= vh / 2) {
               activeMultiplier = (section as any).creepSpeedMultiplier ?? 1.0;
+              sectionHeight = el.offsetHeight || rect.height || vh;
+              activeSection = section;
               break;
             }
           }
         }
 
-        const baseSpeed = 90; // px per second
-        const currentSpeed = baseSpeed * activeMultiplier;
+        // Count words in active section (eyebrow, title, body, sub, lists)
+        let textToCount = "";
+        textToCount += ` ${(activeSection as any).eyebrow ?? ""}`;
+        textToCount += ` ${(activeSection as any).title ?? ""}`;
+        textToCount += ` ${(activeSection as any).body ?? ""}`;
+        textToCount += ` ${(activeSection as any).sub ?? ""}`;
+
+        if ("items" in activeSection && Array.isArray((activeSection as any).items)) {
+          for (const item of (activeSection as any).items) {
+            textToCount += ` ${item.detail ?? ""}`;
+          }
+        }
+        if ("heart" in activeSection && Array.isArray((activeSection as any).heart)) {
+          for (const item of (activeSection as any).heart) {
+            textToCount += ` ${item.detail ?? ""}`;
+          }
+        }
+
+        const words = textToCount.trim().split(/\s+/).filter(Boolean);
+        const wordCount = words.length;
+
+        // Estimated reading time: 200 words/minute baseline with a 4-second floor
+        const readingTimeSeconds = Math.max(4, (wordCount / 200) * 60);
+
+        // Speed = height / time, clamped between 20px/s and 150px/s
+        const calculatedSpeed = sectionHeight / readingTimeSeconds;
+        const speed = Math.min(150, Math.max(20, calculatedSpeed));
+
+        // Apply manual override multiplier
+        const finalSpeed = speed * activeMultiplier;
         const distance = 250; // px per chunk
-        const duration = distance / currentSpeed; // in seconds
+        const duration = distance / finalSpeed; // in seconds
 
         if (currentScroll < maxScroll - 5) {
           // Linear scroll by 250px over calculated duration for absolute smooth constant velocity
