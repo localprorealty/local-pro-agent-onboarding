@@ -43,8 +43,8 @@ export function HeroSection({ data }: { data: SectionData }) {
   const bodyY = useTransform(scrollYProgress, [0.25, 0.4], [20, 0]);
 
   // Sub Copy
-  const subOpacity = useTransform(scrollYProgress, [0.35, 0.48, 0.45, 0.55], [0, 1, 1, 0]);
-  const subY = useTransform(scrollYProgress, [0.35, 0.48], [20, 0]);
+  const subOpacity = useTransform(scrollYProgress, [0.35, 0.45, 0.45, 0.55], [0, 1, 1, 0]);
+  const subY = useTransform(scrollYProgress, [0.35, 0.45], [20, 0]);
 
   // VideoNote (crosses 70% - 90%)
   const videoNoteOpacity = useTransform(scrollYProgress, [0.7, 0.9], [0, 1]);
