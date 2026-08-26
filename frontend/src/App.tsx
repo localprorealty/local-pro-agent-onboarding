@@ -223,10 +223,30 @@ export default function App() {
         const currentScroll = lenis.scroll;
         const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
 
+        // Determine active section to read creepSpeedMultiplier
+        let activeMultiplier = 1.0;
+        for (const section of SECTIONS) {
+          const el = document.getElementById(section.id);
+          if (el) {
+            const rect = el.getBoundingClientRect();
+            const vh = window.innerHeight;
+            // If the section occupies the center of the viewport
+            if (rect.top <= vh / 2 && rect.bottom >= vh / 2) {
+              activeMultiplier = (section as any).creepSpeedMultiplier ?? 1.0;
+              break;
+            }
+          }
+        }
+
+        const baseSpeed = 90; // px per second
+        const currentSpeed = baseSpeed * activeMultiplier;
+        const distance = 250; // px per chunk
+        const duration = distance / currentSpeed; // in seconds
+
         if (currentScroll < maxScroll - 5) {
-          // Linear scroll by 250px over 2 seconds for absolute smooth motion
+          // Linear scroll by 250px over calculated duration for absolute smooth constant velocity
           lenis.scrollTo(currentScroll + 250, {
-            duration: 2.0,
+            duration: duration,
             easing: (t: number) => t, // Linear easing
             onComplete: () => {
               if (isCreepActiveRef.current) {

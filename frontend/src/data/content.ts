@@ -99,6 +99,7 @@ export const SECTIONS = [
     title: "We're not building a bigger version of yesterday's brokerage.",
     body: "Most of what you've just seen — the platform, the coaching, revenue share — didn't exist in real estate ten years ago. We didn't build LocalPRO to be a bigger version of a brokerage from that era. We built it for the agent building their business right now.",
     video: { src: "/videos/clip5-next.mp4", gatesScroll: true },
+    creepSpeedMultiplier: 0.5,
   },
   {
     id: "close",

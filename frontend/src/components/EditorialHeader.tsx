@@ -71,7 +71,7 @@ export function EditorialHeader({
       </Reveal>
       {body && (
         <Reveal delay={0.16}>
-          <p className="text-base md:text-lg text-lp-grey max-w-xl">{parseGlossaryTerms(body)}</p>
+          <p className="text-base md:text-lg text-lp-grey max-w-3xl">{parseGlossaryTerms(body)}</p>
         </Reveal>
       )}
       {sub && (
