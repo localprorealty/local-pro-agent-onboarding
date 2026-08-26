@@ -197,17 +197,22 @@ export default function App() {
             // Check if section is active (occupies center of viewport)
             const isSectionActive = rect.top <= vh / 2 && rect.bottom >= vh / 2;
             
-            // For the Hero section (which has scroll-opacity transforms), only block
-            // if the video is actually visible (wrapper computed opacity > 0.5)
-            // to allow the opening text to scroll and render before halting.
-            // For other sections, computed opacity is always 1.0.
-            const wrapper = video.closest('.hero-video-wrapper') || video.parentElement;
-            const computedOpacity = parseFloat(window.getComputedStyle(wrapper || video).opacity || "1");
-            const isVideoVisible = computedOpacity > 0.5;
-
-            if (isSectionActive && isVideoVisible) {
-              console.log(`[AUTO-SCROLL] Paused: Gated video section ${sectionEl.id} is active and uncompleted`);
-              return true;
+            // For the Hero section (id="open"), calculate scroll progress mathematically
+            // to allow the opening brand logo and text reveals to play before halting.
+            // Halt only when scroll progress reaches the video moment (>= 0.58).
+            if (sectionEl.id === "open") {
+              const maxScroll = rect.height - vh;
+              const progress = maxScroll > 0 ? -rect.top / maxScroll : 0;
+              if (isSectionActive && progress >= 0.58) {
+                console.log(`[AUTO-SCROLL] Paused: Hero gated video is active and visible (progress: ${progress.toFixed(2)})`);
+                return true;
+              }
+            } else {
+              // For other sections, block immediately when the section becomes active
+              if (isSectionActive) {
+                console.log(`[AUTO-SCROLL] Paused: Gated video section ${sectionEl.id} is active and incomplete`);
+                return true;
+              }
             }
           }
         }
