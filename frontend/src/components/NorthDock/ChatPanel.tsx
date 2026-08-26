@@ -13,6 +13,74 @@ interface ChatPanelProps {
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000";
 
+function parseMarkdown(text: string) {
+  const lines = text.split("\n");
+  return lines.map((line, index) => {
+    const trimmed = line.trim();
+    if (!trimmed) {
+      return <div key={index} className="h-1" />;
+    }
+
+    const isBullet = trimmed.startsWith("- ") || trimmed.startsWith("* ");
+    let contentText = trimmed;
+    if (isBullet) {
+      contentText = trimmed.substring(2).trim();
+    }
+
+    const parts: any[] = [];
+    let i = 0;
+    let boldMode = false;
+    let italicMode = false;
+    let currentText = "";
+
+    const flushPart = (keyIdx: number) => {
+      if (!currentText) return;
+      if (boldMode) {
+        parts.push(
+          <strong key={keyIdx} className="font-semibold text-lp-gold">
+            {currentText}
+          </strong>
+        );
+      } else if (italicMode) {
+        parts.push(<em key={keyIdx}>{currentText}</em>);
+      } else {
+        parts.push(currentText);
+      }
+      currentText = "";
+    };
+
+    while (i < contentText.length) {
+      if (contentText.substring(i, i + 2) === "**") {
+        flushPart(i);
+        boldMode = !boldMode;
+        i += 2;
+      } else if (contentText[i] === "*") {
+        flushPart(i);
+        italicMode = !italicMode;
+        i += 1;
+      } else {
+        currentText += contentText[i];
+        i += 1;
+      }
+    }
+    flushPart(i);
+
+    if (isBullet) {
+      return (
+        <li key={index} className="ml-4 list-disc text-lp-grey leading-relaxed my-0.5">
+          {parts}
+        </li>
+      );
+    }
+
+    return (
+      <p key={index} className="leading-relaxed">
+        {parts}
+      </p>
+    );
+  });
+}
+
 export function ChatPanel({ open, onClose }: ChatPanelProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
@@ -99,7 +167,9 @@ export function ChatPanel({ open, onClose }: ChatPanelProps) {
                       : "bg-lp-bg-raised text-lp-smoke border border-lp-border"
                   }`}
                 >
-                  {m.content}
+                  <div className="space-y-1">
+                    {parseMarkdown(m.content)}
+                  </div>
                 </div>
               </div>
             ))}
