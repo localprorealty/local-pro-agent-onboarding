@@ -3,6 +3,7 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import { SectionShell } from "@/components/SectionShell";
 import { EditorialHeader } from "@/components/EditorialHeader";
 import type { SectionData } from "@/data/content";
+import { VideoBlock } from "@/components/VideoBlock";
 
 export function HeroSection({ data }: { data: SectionData }) {
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
@@ -59,6 +60,7 @@ export function HeroSection({ data }: { data: SectionData }) {
           body={"body" in data ? data.body : undefined}
           sub={"sub" in data ? data.sub : undefined}
           videoNote={"videoNote" in data ? data.videoNote : undefined}
+          video={"video" in data ? data.video : undefined}
         />
       </SectionShell>
     );
@@ -133,6 +135,16 @@ export function HeroSection({ data }: { data: SectionData }) {
               className="mt-2 px-3 py-1.5 rounded-md border border-dashed border-lp-border text-[11px] text-lp-grey font-body"
             >
               {data.videoNote}
+            </motion.div>
+          )}
+
+          {/* Video */}
+          {"video" in data && data.video && (
+            <motion.div
+              style={{ opacity: videoNoteOpacity, y: videoNoteY }}
+              className="w-full flex justify-center mt-4"
+            >
+              <VideoBlock src={data.video.src} gatesScroll={data.video.gatesScroll} />
             </motion.div>
           )}
         </div>

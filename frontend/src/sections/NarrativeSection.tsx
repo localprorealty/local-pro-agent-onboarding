@@ -11,6 +11,7 @@ export function NarrativeSection({ data, align = "left" }: { data: SectionData; 
         title={data.title}
         body={"body" in data ? data.body : undefined}
         videoNote={"videoNote" in data ? data.videoNote : undefined}
+        video={"video" in data ? data.video : undefined}
       />
     </SectionShell>
   );

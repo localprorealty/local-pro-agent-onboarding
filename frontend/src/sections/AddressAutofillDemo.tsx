@@ -200,6 +200,7 @@ export function AddressAutofillDemo({
         eyebrow={data.eyebrow}
         title={data.title}
         body={"body" in data ? data.body : undefined}
+        video={"video" in data ? data.video : undefined}
       />
 
       <Reveal delay={0.2}>

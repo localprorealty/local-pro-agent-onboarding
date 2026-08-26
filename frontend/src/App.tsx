@@ -6,6 +6,7 @@ import { SectionRouter } from "@/sections/SectionRouter";
 import { NorthDock } from "@/components/NorthDock/NorthDock";
 import { ScrollProgress } from "@/components/ScrollProgress";
 import { GoogleAuthProvider } from "@/context/GoogleAuthContext";
+import { BrandingBar } from "@/components/BrandingBar";
 
 export default function App() {
   useLenis();
@@ -192,6 +193,14 @@ export default function App() {
         }
       }
 
+      // 4. Check if any gatesScroll video is currently playing
+      const playingGatedVideos = document.querySelectorAll('video[data-gates-scroll="true"]');
+      for (const video of Array.from(playingGatedVideos) as HTMLVideoElement[]) {
+        if (!video.paused && !video.ended) {
+          return true;
+        }
+      }
+
       return false;
     };
 
@@ -301,6 +310,7 @@ export default function App() {
 
   return (
     <div className="relative bg-lp-bg font-body">
+      <BrandingBar scrollYProgress={scrollYProgress} />
       {/* Hide standard cursor only on non-touch devices where custom cursor is active */}
       {showCursor && (
         <style>{`

@@ -1,5 +1,6 @@
 import { Reveal } from "./Reveal";
 import { Tooltip } from "./Tooltip";
+import { VideoBlock } from "./VideoBlock";
 
 const GLOSSARY = {
   cap: "The annual split commission limit contributed to the brokerage ($16,000). Once reached, the agent keeps 100% of their commission for the remainder of their anniversary year.",
@@ -43,6 +44,7 @@ interface EditorialHeaderProps {
   body?: string;
   sub?: string;
   videoNote?: string;
+  video?: { src: string; gatesScroll: boolean };
   align?: "left" | "center";
 }
 
@@ -52,6 +54,7 @@ export function EditorialHeader({
   body,
   sub,
   videoNote,
+  video,
   align = "left",
 }: EditorialHeaderProps) {
   const textAlign = align === "center" ? "text-center items-center" : "text-left items-start";
@@ -81,6 +84,11 @@ export function EditorialHeader({
           <div className="mt-2 px-3 py-1.5 rounded-md border border-dashed border-lp-border text-[11px] text-lp-grey font-body">
             {videoNote}
           </div>
+        </Reveal>
+      )}
+      {video && (
+        <Reveal delay={0.34} className="w-full flex justify-center">
+          <VideoBlock src={video.src} gatesScroll={video.gatesScroll} />
         </Reveal>
       )}
     </div>
