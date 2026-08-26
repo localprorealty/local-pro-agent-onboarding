@@ -165,7 +165,7 @@ export function HeroSection({ data }: { data: SectionData }) {
               y: videoY,
               scale: videoScale,
             }}
-            className="absolute max-w-4xl w-full px-6 z-20 mt-16 hero-video-wrapper"
+            className="absolute max-w-4xl w-full px-6 z-20 hero-video-wrapper"
           >
             <VideoBlock src={data.video.src} gatesScroll={data.video.gatesScroll} />
           </motion.div>

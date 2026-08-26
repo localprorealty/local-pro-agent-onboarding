@@ -362,8 +362,8 @@ export default function App() {
             const rect = heroSection.getBoundingClientRect();
             const maxScroll = rect.height - window.innerHeight;
             const progress = maxScroll > 0 ? -rect.top / maxScroll : 0;
-            // Only autoplay when scroll progress is between 0.65 and 0.85
-            if (progress < 0.65 || progress > 0.85) {
+            // Only autoplay when scroll progress is above 0.35 (so it doesn't trigger on initial mount)
+            if (progress < 0.35) {
               continue;
             }
           }
@@ -376,7 +376,8 @@ export default function App() {
           const wrapper = video.closest('.hero-video-wrapper') || video.parentElement;
           const computedOpacity = parseFloat(window.getComputedStyle(wrapper || video).opacity || "1");
           
-          if (Math.abs(videoCenter - viewportCenter) < 120 && computedOpacity > 0.8) {
+          // Let centering check be more lenient (within 200px) and opacity check be more lenient (visible opacity > 0.2)
+          if (Math.abs(videoCenter - viewportCenter) < 200 && computedOpacity > 0.2) {
             console.log("[AUTO-SCROLL] Gated video centered and visible. Autoplay triggered!");
             
             // Stop scroll
@@ -393,8 +394,13 @@ export default function App() {
               }
             }
             
+            // Play unmuted, fallback to muted if browser blocks unmuted audio autoplay
             video.play().catch((err) => {
-              console.log("[AUTO-SCROLL] Autoplay failed:", err);
+              console.log("[AUTO-SCROLL] Unmuted autoplay blocked, falling back to muted:", err);
+              video.muted = true;
+              video.play().catch((err2) => {
+                console.log("[AUTO-SCROLL] Muted autoplay also failed:", err2);
+              });
             });
             break;
           }
