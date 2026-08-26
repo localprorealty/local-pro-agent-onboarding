@@ -66,6 +66,7 @@ export function ChatPanel({ open, onClose }: ChatPanelProps) {
           className="fixed bottom-24 right-5 z-50 w-[340px] max-h-[480px] flex flex-col rounded-2xl bg-lp-card border border-lp-border shadow-2xl overflow-hidden font-north"
           role="dialog"
           aria-label="Chat with North"
+          data-lenis-prevent
         >
           <div className="flex items-center justify-between px-4 py-3 border-b border-lp-border">
             <span className="text-sm font-medium text-lp-smoke">Ask North</span>
