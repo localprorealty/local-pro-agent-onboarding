@@ -169,7 +169,10 @@ export default function App() {
     const isUserInExclusionZone = () => {
       // 1. Check if chat panel is open
       const isChatOpen = !!document.querySelector('[aria-label="Chat with North"]');
-      if (isChatOpen) return true;
+      if (isChatOpen) {
+        console.log("[AUTO-SCROLL] Exclusion triggered: chat panel is open");
+        return true;
+      }
 
       // 2. Check if any input or interactive element is focused inside these sections
       const active = document.activeElement;
@@ -177,6 +180,7 @@ export default function App() {
         active &&
         active.closest("#revenue-calculator, #platform-demo, #ai-marketing, #form, #close")
       ) {
+        console.log("[AUTO-SCROLL] Exclusion triggered: focused element in zone:", active);
         return true;
       }
 
@@ -189,7 +193,14 @@ export default function App() {
           const vh = window.innerHeight;
           // Visible if overlapping with the viewport
           const isVisible = rect.top < vh - 20 && rect.bottom > 20;
+          console.log(`[AUTO-SCROLL] id=${id} check:`, {
+            rectTop: Math.round(rect.top),
+            rectBottom: Math.round(rect.bottom),
+            vh,
+            isVisible
+          });
           if (isVisible) {
+            console.log(`[AUTO-SCROLL] Exclusion triggered: section #${id} is visible`);
             return true;
           }
         }
