@@ -205,10 +205,23 @@ export default function App() {
 
       const lenis = lenisRef.current;
       const prefersReduced = prefersReducedMotionRef.current;
+      const isExcl = isUserInExclusionZone();
 
-      if (lenis && !prefersReduced && !isUserInExclusionZone()) {
+      console.log("[AUTO-SCROLL] creepScroll check:", {
+        isCreepActive: isCreepActiveRef.current,
+        hasLenis: !!lenis,
+        prefersReduced,
+        isUserInExclusionZone: isExcl
+      });
+
+      if (lenis && !prefersReduced && !isExcl) {
         const currentScroll = lenis.scroll;
         const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+
+        console.log("[AUTO-SCROLL] Executing lenis.scrollTo:", {
+          from: currentScroll,
+          to: currentScroll + 80
+        });
 
         if (currentScroll < maxScroll - 5) {
           // Linear scroll by 80px over 2 seconds (40px/sec) for absolute smooth motion
@@ -216,16 +229,19 @@ export default function App() {
             duration: 2.0,
             easing: (t: number) => t, // Linear easing
             onComplete: () => {
+              console.log("[AUTO-SCROLL] lenis.scrollTo step completed");
               if (isCreepActiveRef.current) {
                 creepScroll();
               }
             }
           });
         } else {
+          console.log("[AUTO-SCROLL] Reached max scroll, stopping creep");
           stopCreep();
         }
       } else {
         // If paused due to exclusion zone, check again in 500ms
+        console.log("[AUTO-SCROLL] Creep paused/aborted due to check failure, scheduling retry in 500ms");
         creepFrameId = window.setTimeout(() => {
           if (isCreepActiveRef.current) {
             creepScroll();
@@ -320,7 +336,7 @@ export default function App() {
             isUserInExclusionZone: isExcl
           });
           if (lenis) {
-            lenis.scrollTo(lenis.scroll + 15, { immediate: true });
+            lenis.scrollTo(lenis.scroll + 25, { immediate: true });
           }
         }}
         className="fixed top-4 left-4 z-[99999] px-3 py-2 bg-lp-gold text-lp-bg font-semibold text-xs rounded shadow-lg hover:bg-lp-gold/90 transition-colors cursor-pointer select-none"
