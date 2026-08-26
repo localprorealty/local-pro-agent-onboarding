@@ -50,14 +50,14 @@ export function HeroSection({ data }: { data: SectionData }) {
   const videoNoteOpacity = useTransform(scrollYProgress, [0.7, 0.9], [0, 1]);
   const videoNoteY = useTransform(scrollYProgress, [0.7, 0.9], [20, 0]);
 
-  // Text container translates up and fades out slightly to make room for video to center
-  const textY = useTransform(scrollYProgress, [0.45, 0.75], [0, -180]);
-  const textOpacity = useTransform(scrollYProgress, [0.45, 0.75], [1, 0.15]);
+  // Text container translates up and fades out cleanly before video enters
+  const textY = useTransform(scrollYProgress, [0.35, 0.55], [0, -240]);
+  const textOpacity = useTransform(scrollYProgress, [0.35, 0.55], [1, 0]);
 
   // Video transitions: starts invisible and translated down, then fades in and centers
-  const videoOpacity = useTransform(scrollYProgress, [0.55, 0.8], [0, 1]);
-  const videoY = useTransform(scrollYProgress, [0.55, 0.8], [150, 0]);
-  const videoScale = useTransform(scrollYProgress, [0.55, 0.8], [0.95, 1]);
+  const videoOpacity = useTransform(scrollYProgress, [0.55, 0.7, 0.85, 0.95], [0, 1, 1, 0]);
+  const videoY = useTransform(scrollYProgress, [0.55, 0.7], [180, 0]);
+  const videoScale = useTransform(scrollYProgress, [0.55, 0.7], [0.92, 1]);
 
   if (prefersReducedMotion) {
     return (
@@ -165,7 +165,7 @@ export function HeroSection({ data }: { data: SectionData }) {
               y: videoY,
               scale: videoScale,
             }}
-            className="absolute max-w-4xl w-full px-6 z-10 mt-16"
+            className="absolute max-w-4xl w-full px-6 z-20 mt-16 hero-video-wrapper"
           >
             <VideoBlock src={data.video.src} gatesScroll={data.video.gatesScroll} />
           </motion.div>
