@@ -4,6 +4,7 @@ import { SectionShell } from "@/components/SectionShell";
 import { EditorialHeader } from "@/components/EditorialHeader";
 import { Reveal } from "@/components/Reveal";
 import type { SectionData } from "@/data/content";
+import { Tooltip } from "@/components/Tooltip";
 
 // Constants from LocalPRO Hub legacy rate table
 const TIER_ELIGIBILITY = [
@@ -102,7 +103,12 @@ export function RevenueCalculator({ data }: { data: SectionData }) {
             {/* Input 1: Agents Referred */}
             <div className="flex flex-col gap-2">
               <div className="flex justify-between items-center text-sm font-medium">
-                <label htmlFor="agents-input" className="text-lp-smoke">Referred Agents</label>
+                <label htmlFor="agents-input" className="text-lp-smoke inline-flex items-center gap-1">
+                  Referred Agents
+                  <Tooltip text="Active productive agents you personally sponsored into LocalPRO Realty.">
+                    <span className="text-lp-gold select-none font-normal text-[11px] font-body bg-lp-gold/10 px-1 rounded hover:bg-lp-gold/20 transition-colors">ⓘ</span>
+                  </Tooltip>
+                </label>
                 <div className="flex items-center gap-2">
                   <span className="text-xs px-2 py-0.5 rounded bg-lp-gold/10 text-lp-gold font-body border border-lp-gold/20">
                     Tier {activeTier}
@@ -140,7 +146,12 @@ export function RevenueCalculator({ data }: { data: SectionData }) {
             {/* Input 2: Average Cap Contribution % */}
             <div className="flex flex-col gap-2">
               <div className="flex justify-between items-center text-sm font-medium">
-                <label htmlFor="cap-percent-input" className="text-lp-smoke">Average % of Cap Paid In</label>
+                <label htmlFor="cap-percent-input" className="text-lp-smoke inline-flex items-center gap-1">
+                  Average % of Cap Paid In
+                  <Tooltip text="The average percentage of the annual cap amount that your referred agents reach before their anniversary year resets.">
+                    <span className="text-lp-gold select-none font-normal text-[11px] font-body bg-lp-gold/10 px-1 rounded hover:bg-lp-gold/20 transition-colors">ⓘ</span>
+                  </Tooltip>
+                </label>
                 <span className="text-lp-gold font-semibold font-body">{capPercent}%</span>
               </div>
               <input

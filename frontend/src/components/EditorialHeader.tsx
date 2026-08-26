@@ -1,4 +1,41 @@
 import { Reveal } from "./Reveal";
+import { Tooltip } from "./Tooltip";
+
+const GLOSSARY = {
+  cap: "The annual split commission limit contributed to the brokerage ($16,000). Once reached, the agent keeps 100% of their commission for the remainder of their anniversary year.",
+  tier: "The level in the rate matrix (1–5) determined by the number of active front-line referred agents, unlocking different payout rates."
+};
+
+function parseGlossaryTerms(text: string) {
+  const regex = /\b(cap|tier|caps|tiers)\b/gi;
+  const parts = text.split(regex);
+  if (parts.length === 1) return text;
+
+  return parts.map((part, index) => {
+    const lower = part.toLowerCase();
+    if (lower === "cap" || lower === "caps") {
+      return (
+        <span key={index} className="inline-flex items-center">
+          {part}
+          <Tooltip text={GLOSSARY.cap}>
+            <span className="text-lp-gold ml-0.5 select-none font-normal text-[11px] font-body bg-lp-gold/10 px-1 rounded hover:bg-lp-gold/20 transition-colors">ⓘ</span>
+          </Tooltip>
+        </span>
+      );
+    }
+    if (lower === "tier" || lower === "tiers") {
+      return (
+        <span key={index} className="inline-flex items-center">
+          {part}
+          <Tooltip text={GLOSSARY.tier}>
+            <span className="text-lp-gold ml-0.5 select-none font-normal text-[11px] font-body bg-lp-gold/10 px-1 rounded hover:bg-lp-gold/20 transition-colors">ⓘ</span>
+          </Tooltip>
+        </span>
+      );
+    }
+    return part;
+  });
+}
 
 interface EditorialHeaderProps {
   eyebrow: string;
@@ -31,7 +68,7 @@ export function EditorialHeader({
       </Reveal>
       {body && (
         <Reveal delay={0.16}>
-          <p className="text-base md:text-lg text-lp-grey max-w-xl">{body}</p>
+          <p className="text-base md:text-lg text-lp-grey max-w-xl">{parseGlossaryTerms(body)}</p>
         </Reveal>
       )}
       {sub && (
