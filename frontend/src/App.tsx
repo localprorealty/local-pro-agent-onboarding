@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useMotionValue, useSpring, motion, useScroll, AnimatePresence } from "framer-motion";
 import { useLenis } from "@/lib/useLenis";
 import { SECTIONS } from "@/data/content";
@@ -14,6 +14,17 @@ export default function App() {
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const [hideScrollCue, setHideScrollCue] = useState(false);
   const [lenisInstance, setLenisInstance] = useState<any | null>(null);
+  const lenisRef = useRef<any>(null);
+  const prefersReducedMotionRef = useRef(false);
+  const isAutoScrollingRef = useRef(false);
+
+  useEffect(() => {
+    lenisRef.current = lenisInstance;
+  }, [lenisInstance]);
+
+  useEffect(() => {
+    prefersReducedMotionRef.current = prefersReducedMotion;
+  }, [prefersReducedMotion]);
 
   const { scrollYProgress } = useScroll();
 
@@ -149,8 +160,6 @@ export default function App() {
 
   // Gentle auto-advance for users who stop interacting for an extended period
   useEffect(() => {
-    if (!lenisInstance || prefersReducedMotion) return;
-
     let idleTimeout: any = null;
     let lastX = -1;
     let lastY = -1;
@@ -193,19 +202,41 @@ export default function App() {
       }
 
       idleTimeout = setTimeout(() => {
-        if (isUserInExclusionZone()) {
-          // Reset and check again in another 9 seconds if currently in an exclusion zone
+        const lenis = lenisRef.current;
+        const prefersReduced = prefersReducedMotionRef.current;
+
+        console.log("[AUTO-SCROLL] Idle timeout triggered. Checking status...");
+
+        if (!lenis) {
+          console.log("[AUTO-SCROLL] Idle timeout aborted: lenisInstance is null");
           resetIdleTimer();
           return;
         }
 
-        const currentScroll = lenisInstance.scroll;
+        if (prefersReduced) {
+          console.log("[AUTO-SCROLL] Idle timeout aborted: prefers-reduced-motion is active");
+          resetIdleTimer();
+          return;
+        }
+
+        if (isUserInExclusionZone()) {
+          console.log("[AUTO-SCROLL] Idle timeout aborted: user is in exclusion zone");
+          resetIdleTimer();
+          return;
+        }
+
+        const currentScroll = lenis.scroll;
         const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
 
         if (currentScroll >= maxScroll - 10) {
+          console.log("[AUTO-SCROLL] Idle timeout aborted: already at bottom of page");
           resetIdleTimer();
           return;
         }
+
+        // Set auto scrolling state to true before starting animation
+        isAutoScrollingRef.current = true;
+        console.log("[AUTO-SCROLL] Nudge started from scroll offset", currentScroll);
 
         // TODO: Video Section Integration
         // Once real <video> elements are added to replace the videoNote placeholders in the
@@ -215,17 +246,30 @@ export default function App() {
 
         const targetScroll = Math.min(currentScroll + window.innerHeight, maxScroll);
 
-        lenisInstance.scrollTo(targetScroll, {
+        lenis.scrollTo(targetScroll, {
           duration: 1.5,
           easing: (t: number) => (t === 1 ? 1 : 1 - Math.pow(2, -10 * t)),
+          onComplete: () => {
+            isAutoScrollingRef.current = false;
+            console.log("[AUTO-SCROLL] Nudge animation completed at scroll offset", lenis.scroll);
+            resetIdleTimer();
+          }
         });
-
-        // Reset timer after executing nudge to check for next idle period
-        resetIdleTimer();
       }, 9000); // 9 seconds of zero activity
+      console.log("[AUTO-SCROLL] Timer registered for 9 seconds");
     };
 
     const handleActivity = () => {
+      if (isAutoScrollingRef.current) {
+        // If the user scrolls, clicks, or interacts during the nudge, cancel it immediately
+        isAutoScrollingRef.current = false;
+        const lenis = lenisRef.current;
+        if (lenis) {
+          lenis.stop();
+          lenis.start();
+        }
+        console.log("[AUTO-SCROLL] Nudge animation cancelled by user interaction!");
+      }
       resetIdleTimer();
     };
 
@@ -257,7 +301,7 @@ export default function App() {
       window.removeEventListener("wheel", handleActivity);
       window.removeEventListener("touchmove", handleActivity);
     };
-  }, [lenisInstance, prefersReducedMotion]);
+  }, []);
 
   return (
     <div className="relative bg-lp-bg font-body">
