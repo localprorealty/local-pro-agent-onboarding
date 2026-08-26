@@ -211,12 +211,27 @@ export default function App() {
         const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
 
         if (currentScroll < maxScroll - 5) {
-          // Creep forward gently by 1px per frame (approx 60px/sec at 60fps)
-          lenis.scrollTo(currentScroll + 1.0, { immediate: true });
+          // Linear scroll by 80px over 2 seconds (40px/sec) for absolute smooth motion
+          lenis.scrollTo(currentScroll + 80, {
+            duration: 2.0,
+            easing: (t: number) => t, // Linear easing
+            onComplete: () => {
+              if (isCreepActiveRef.current) {
+                creepScroll();
+              }
+            }
+          });
+        } else {
+          stopCreep();
         }
+      } else {
+        // If paused due to exclusion zone, check again in 500ms
+        creepFrameId = window.setTimeout(() => {
+          if (isCreepActiveRef.current) {
+            creepScroll();
+          }
+        }, 500);
       }
-
-      creepFrameId = requestAnimationFrame(creepScroll);
     };
 
     const startCreep = () => {
@@ -231,7 +246,13 @@ export default function App() {
         isCreepActiveRef.current = false;
         if (creepFrameId !== null) {
           cancelAnimationFrame(creepFrameId);
+          clearTimeout(creepFrameId);
           creepFrameId = null;
+        }
+        const lenis = lenisRef.current;
+        if (lenis) {
+          lenis.stop();
+          lenis.start();
         }
         console.log("[AUTO-SCROLL] Idle creep deactivated due to user interaction");
       }
@@ -299,7 +320,7 @@ export default function App() {
             isUserInExclusionZone: isExcl
           });
           if (lenis) {
-            lenis.scrollTo(lenis.scroll + 5, { immediate: true });
+            lenis.scrollTo(lenis.scroll + 15, { immediate: true });
           }
         }}
         className="fixed top-4 left-4 z-[99999] px-3 py-2 bg-lp-gold text-lp-bg font-semibold text-xs rounded shadow-lg hover:bg-lp-gold/90 transition-colors cursor-pointer select-none"
