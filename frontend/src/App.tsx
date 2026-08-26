@@ -186,12 +186,30 @@ export default function App() {
 
 
 
-      // 4. Check if any gatesScroll video is currently playing
-      const playingGatedVideos = document.querySelectorAll('video[data-gates-scroll="true"]');
-      for (const video of Array.from(playingGatedVideos) as HTMLVideoElement[]) {
-        if (!video.paused && !video.ended) {
-          console.log("[AUTO-SCROLL] Gated: A video with scroll-gating is currently playing");
-          return true;
+      // 4. Check if any gated video's section is active and the video has not ended
+      const gatedVideos = document.querySelectorAll('video[data-gates-scroll="true"]');
+      for (const video of Array.from(gatedVideos) as HTMLVideoElement[]) {
+        if (!video.ended) {
+          const sectionEl = video.closest('section');
+          if (sectionEl) {
+            const rect = sectionEl.getBoundingClientRect();
+            const vh = window.innerHeight;
+            // Check if section is active (occupies center of viewport)
+            const isSectionActive = rect.top <= vh / 2 && rect.bottom >= vh / 2;
+            
+            // For the Hero section (which has scroll-opacity transforms), only block
+            // if the video is actually visible (wrapper computed opacity > 0.5)
+            // to allow the opening text to scroll and render before halting.
+            // For other sections, computed opacity is always 1.0.
+            const wrapper = video.closest('.hero-video-wrapper') || video.parentElement;
+            const computedOpacity = parseFloat(window.getComputedStyle(wrapper || video).opacity || "1");
+            const isVideoVisible = computedOpacity > 0.5;
+
+            if (isSectionActive && isVideoVisible) {
+              console.log(`[AUTO-SCROLL] Paused: Gated video section ${sectionEl.id} is active and uncompleted`);
+              return true;
+            }
+          }
         }
       }
 
@@ -352,62 +370,6 @@ export default function App() {
       }
     };
 
-    const checkGatedVideoAutoplay = () => {
-      const gatedVideos = document.querySelectorAll('video[data-gates-scroll="true"]');
-      for (const video of Array.from(gatedVideos) as HTMLVideoElement[]) {
-        if (video.paused && !video.ended) {
-          // If the video is inside the Hero section, check scroll progress to prevent premature autoplay
-          const heroSection = document.getElementById("open");
-          if (heroSection && video.closest('#open')) {
-            const rect = heroSection.getBoundingClientRect();
-            const maxScroll = rect.height - window.innerHeight;
-            const progress = maxScroll > 0 ? -rect.top / maxScroll : 0;
-            // Only autoplay when scroll progress is above 0.35 (so it doesn't trigger on initial mount)
-            if (progress < 0.35) {
-              continue;
-            }
-          }
-
-          const rect = video.getBoundingClientRect();
-          const vh = window.innerHeight;
-          const videoCenter = rect.top + rect.height / 2;
-          const viewportCenter = vh / 2;
-          
-          const wrapper = video.closest('.hero-video-wrapper') || video.parentElement;
-          const computedOpacity = parseFloat(window.getComputedStyle(wrapper || video).opacity || "1");
-          
-          // Let centering check be more lenient (within 200px) and opacity check be more lenient (visible opacity > 0.2)
-          if (Math.abs(videoCenter - viewportCenter) < 200 && computedOpacity > 0.2) {
-            console.log("[AUTO-SCROLL] Gated video centered and visible. Autoplay triggered!");
-            
-            // Stop scroll
-            if (isCreepActiveRef.current) {
-              isCreepActiveRef.current = false;
-              if (creepFrameId !== null) {
-                clearTimeout(creepFrameId);
-                creepFrameId = null;
-              }
-              const lenis = lenisRef.current;
-              if (lenis) {
-                lenis.stop();
-                lenis.start();
-              }
-            }
-            
-            // Play unmuted, fallback to muted if browser blocks unmuted audio autoplay
-            video.play().catch((err) => {
-              console.log("[AUTO-SCROLL] Unmuted autoplay blocked, falling back to muted:", err);
-              video.muted = true;
-              video.play().catch((err2) => {
-                console.log("[AUTO-SCROLL] Muted autoplay also failed:", err2);
-              });
-            });
-            break;
-          }
-        }
-      }
-    };
-
     // Listen to standard interaction events
     window.addEventListener("mousemove", handleMouseMove);
     window.addEventListener("mousedown", handleActivity);
@@ -415,7 +377,6 @@ export default function App() {
     window.addEventListener("wheel", handleActivity, { passive: true });
     window.addEventListener("touchmove", handleActivity, { passive: true });
     window.addEventListener("ended", handleVideoEnded, true);
-    window.addEventListener("scroll", checkGatedVideoAutoplay, { passive: true });
 
     // Start timer on mount
     resetIdleTimer();
@@ -431,7 +392,6 @@ export default function App() {
       window.removeEventListener("wheel", handleActivity);
       window.removeEventListener("touchmove", handleActivity);
       window.removeEventListener("ended", handleVideoEnded, true);
-      window.removeEventListener("scroll", checkGatedVideoAutoplay);
     };
   }, []);
 

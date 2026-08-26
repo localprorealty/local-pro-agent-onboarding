@@ -23,7 +23,7 @@ export function HeroSection({ data }: { data: SectionData }) {
   });
 
   // 1. Logo Reveal (0 - 20%)
-  const logoOpacity = useTransform(scrollYProgress, [0, 0.05, 0.12, 0.2], [0, 1, 1, 0]);
+  const logoOpacity = useTransform(scrollYProgress, [0, 0.12, 0.2], [1, 1, 0]);
   const logoScale = useTransform(scrollYProgress, [0.12, 0.2], [1, 0.85]);
   const logoY = useTransform(scrollYProgress, [0.12, 0.2], [0, -30]);
 
@@ -50,9 +50,8 @@ export function HeroSection({ data }: { data: SectionData }) {
   const videoNoteOpacity = useTransform(scrollYProgress, [0.7, 0.9], [0, 1]);
   const videoNoteY = useTransform(scrollYProgress, [0.7, 0.9], [20, 0]);
 
-  // Text container translates up and fades out cleanly before video enters
+  // Text container translates up cleanly before video enters
   const textY = useTransform(scrollYProgress, [0.35, 0.55], [0, -240]);
-  const textOpacity = useTransform(scrollYProgress, [0.35, 0.55], [1, 0]);
 
   // Video transitions: starts invisible and translated down, then fades in and centers
   const videoOpacity = useTransform(scrollYProgress, [0.55, 0.7, 0.85, 0.95], [0, 1, 1, 0]);
@@ -102,7 +101,7 @@ export function HeroSection({ data }: { data: SectionData }) {
         {/* Content Container */}
         <div className="w-full max-w-3xl mx-auto flex flex-col items-center text-center gap-6 relative z-10">
           <motion.div
-            style={{ y: textY, opacity: textOpacity }}
+            style={{ y: textY }}
             className="flex flex-col items-center text-center gap-6 w-full"
           >
             {/* Eyebrow */}
