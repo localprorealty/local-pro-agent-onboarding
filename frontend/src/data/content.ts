@@ -64,8 +64,8 @@ export const SECTIONS = [
   {
     id: "revenue-share-explain",
     eyebrow: "Growth beyond closings",
-    title: "Revenue Share gives agents the opportunity to participate in the growth they help create.",
-    body: "Sponsor with discernment. Help productive agents succeed. Share in expanding production.",
+    title: "Here's how sponsoring another agent actually pays you.",
+    body: "When you help someone join LocalPRO — a friend, someone you mentored, a new agent you recruited — you become their sponsor. Every time they close a deal, LocalPRO keeps a portion of it. A slice of that portion comes back to you, automatically, for as long as they're still working toward their yearly cap. The more agents you've sponsored, and the further along they are in their cap, the bigger your slice. You don't do extra work for this — it's a reward for helping someone else succeed.",
     videoNote: "[[Robert continues]]",
   },
   {
