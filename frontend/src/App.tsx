@@ -169,7 +169,10 @@ export default function App() {
     const isUserInExclusionZone = () => {
       // 1. Check if chat panel is open (only matches the dialog when active, not the persistent dock button)
       const isChatOpen = !!document.querySelector('div[role="dialog"][aria-label="Chat with North"]');
-      if (isChatOpen) return true;
+      if (isChatOpen) {
+        console.log("[AUTO-SCROLL] Paused: Chat panel is currently open");
+        return true;
+      }
 
       // 2. Check if any input or interactive element is focused inside these sections
       const active = document.activeElement;
@@ -177,6 +180,7 @@ export default function App() {
         active &&
         active.closest("#revenue-calculator, #platform-demo, #ai-marketing, #form, #close")
       ) {
+        console.log("[AUTO-SCROLL] Paused: User is interacting with input inside section:", active);
         return true;
       }
 
@@ -189,7 +193,10 @@ export default function App() {
           const vh = window.innerHeight;
           // Visible if overlapping with the viewport
           const isVisible = rect.top < vh - 20 && rect.bottom > 20;
-          if (isVisible) return true;
+          if (isVisible) {
+            console.log(`[AUTO-SCROLL] Paused: Exclusion section #${id} is visible in viewport`);
+            return true;
+          }
         }
       }
 
@@ -197,6 +204,7 @@ export default function App() {
       const playingGatedVideos = document.querySelectorAll('video[data-gates-scroll="true"]');
       for (const video of Array.from(playingGatedVideos) as HTMLVideoElement[]) {
         if (!video.paused && !video.ended) {
+          console.log("[AUTO-SCROLL] Gated: A video with scroll-gating is currently playing");
           return true;
         }
       }
@@ -230,6 +238,11 @@ export default function App() {
           stopCreep();
         }
       } else {
+        if (!lenis) {
+          console.log("[AUTO-SCROLL] Creep paused: Lenis instance not ready");
+        } else if (prefersReduced) {
+          console.log("[AUTO-SCROLL] Creep paused: prefers-reduced-motion is active");
+        }
         // If paused due to exclusion zone, check again in 500ms
         creepFrameId = window.setTimeout(() => {
           if (isCreepActiveRef.current) {
