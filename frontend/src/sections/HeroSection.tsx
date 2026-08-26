@@ -22,29 +22,27 @@ export function HeroSection({ data }: { data: SectionData }) {
     offset: ["start start", "end end"],
   });
 
-  // 1. Logo Reveal (0 - 20%)
-  const logoOpacity = useTransform(scrollYProgress, [0, 0.12, 0.2], [1, 1, 0]);
-  const logoScale = useTransform(scrollYProgress, [0.12, 0.2], [1, 0.85]);
-  const logoY = useTransform(scrollYProgress, [0.12, 0.2], [0, -30]);
+  // 1. Logo Reveal (0 - 18%)
+  const logoOpacity = useTransform(scrollYProgress, [0, 0.12, 0.18], [1, 1, 0]);
+  const logoScale = useTransform(scrollYProgress, [0.12, 0.18], [1, 0.85]);
+  const logoY = useTransform(scrollYProgress, [0.12, 0.18], [0, -30]);
 
-
-
-  // 3. Eyebrow + Title + Copy (Shifted later by ~15-20%)
+  // 3. Eyebrow + Title + Copy (Strictly sequential: 22% - 55%)
   // Title: Settling in focus and scaling down slightly
-  const titleScale = useTransform(scrollYProgress, [0.18, 0.55], [1.1, 1]);
-  const titleBlur = useTransform(scrollYProgress, [0.18, 0.45], [8, 0]);
-  const titleOpacity = useTransform(scrollYProgress, [0.15, 0.3, 0.45, 0.55], [0, 1, 1, 0]);
+  const titleScale = useTransform(scrollYProgress, [0.22, 0.45], [1.08, 1]);
+  const titleBlur = useTransform(scrollYProgress, [0.22, 0.38], [8, 0]);
+  const titleOpacity = useTransform(scrollYProgress, [0.22, 0.32, 0.48, 0.55], [0, 1, 1, 0]);
 
   // Eyebrow
-  const eyebrowOpacity = useTransform(scrollYProgress, [0.15, 0.25, 0.45, 0.55], [0, 1, 1, 0]);
+  const eyebrowOpacity = useTransform(scrollYProgress, [0.22, 0.3, 0.48, 0.55], [0, 1, 1, 0]);
 
   // Body
-  const bodyOpacity = useTransform(scrollYProgress, [0.25, 0.4, 0.45, 0.55], [0, 1, 1, 0]);
-  const bodyY = useTransform(scrollYProgress, [0.25, 0.4], [20, 0]);
+  const bodyOpacity = useTransform(scrollYProgress, [0.3, 0.4, 0.48, 0.55], [0, 1, 1, 0]);
+  const bodyY = useTransform(scrollYProgress, [0.3, 0.4], [20, 0]);
 
   // Sub Copy
-  const subOpacity = useTransform(scrollYProgress, [0.35, 0.45, 0.45, 0.55], [0, 1, 1, 0]);
-  const subY = useTransform(scrollYProgress, [0.35, 0.45], [20, 0]);
+  const subOpacity = useTransform(scrollYProgress, [0.38, 0.46, 0.48, 0.55], [0, 1, 1, 0]);
+  const subY = useTransform(scrollYProgress, [0.38, 0.46], [20, 0]);
 
   // VideoNote (crosses 70% - 90%)
   const videoNoteOpacity = useTransform(scrollYProgress, [0.7, 0.9], [0, 1]);
