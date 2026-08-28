@@ -46,6 +46,23 @@ export function RecognitionSection({ data }: { data: SectionData }) {
     };
   }, [prefersReducedMotion]);
 
+  const handleBadgeHover = (e: React.MouseEvent<HTMLImageElement>) => {
+    if (prefersReducedMotion) return;
+
+    const rect = e.currentTarget.getBoundingClientRect();
+    // Normalize coordinates relative to viewport size to pop confetti directly from the hovered element
+    const x = (rect.left + rect.width / 2) / window.innerWidth;
+    const y = (rect.top + rect.height / 2) / window.innerHeight;
+
+    confetti({
+      particleCount: 60,
+      angle: 90,
+      spread: 70,
+      origin: { x, y },
+      colors: ["#cfb87c", "#ffffff", "#1a1a1a"],
+    });
+  };
+
   const badges = "badges" in data ? data.badges : [];
 
   return (
@@ -58,16 +75,17 @@ export function RecognitionSection({ data }: { data: SectionData }) {
           body={"body" in data ? data.body : undefined}
         />
         {badges && badges.length > 0 && (
-          <div className="w-full flex justify-start items-center gap-12 mt-6">
+          <div className="w-full flex flex-col sm:flex-row justify-start items-start sm:items-center gap-8 mt-6">
             {badges.map((src, i) => (
               <Reveal key={i} delay={0.15 + i * 0.12}>
-                <div className="relative group">
+                <div className="relative group p-6 rounded-2xl border border-lp-border bg-lp-card/35 transition-all duration-500 hover:border-lp-gold/30 hover:bg-lp-card/65 select-none">
                   {/* Soft golden backing glow */}
-                  <div className="absolute inset-0 bg-lp-gold/5 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <div className="absolute inset-0 bg-lp-gold/5 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
                   <img
                     src={src}
                     alt="DFW Top Workplace Award Logo"
-                    className="h-28 md:h-36 w-auto object-contain relative z-10 transition-transform duration-500 group-hover:scale-105 select-none"
+                    onMouseEnter={handleBadgeHover}
+                    className="h-44 md:h-52 w-auto object-contain relative z-10 transition-transform duration-500 group-hover:scale-105"
                   />
                 </div>
               </Reveal>
