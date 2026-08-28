@@ -4,6 +4,7 @@ import { HiddenWeightSection } from "./HiddenWeightSection";
 import { GoogleCaptureSection } from "./GoogleCaptureSection";
 import { NarrativeSection } from "./NarrativeSection";
 import { HeartSection } from "./HeartSection";
+import { RecognitionSection } from "./RecognitionSection";
 import { FormSection } from "./FormSection";
 import { RevenueCalculator } from "./RevenueCalculator";
 import { AddressAutofillDemo } from "./AddressAutofillDemo";
@@ -34,6 +35,8 @@ export function SectionRouter({ data, sharedMlsData, setSharedMlsData }: Section
       return <GoogleCaptureSection data={data} />;
     case "heart":
       return <HeartSection data={data} />;
+    case "recognition":
+      return <RecognitionSection data={data} />;
     case "built-for-next":
     case "close":
       return <NarrativeSection data={data} align="left" />;

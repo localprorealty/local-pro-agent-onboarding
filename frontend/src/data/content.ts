@@ -41,7 +41,13 @@ export const SECTIONS = [
     id: "ai-marketing",
     eyebrow: "Marketing, with an AI teammate",
     title: "We don't just give you tools. We give you a teammate that never sleeps.",
-    body: "Every listing needs a description, a caption, maybe a flyer, and writing decent copy from scratch every single time is its own quiet time sink. Give the platform a few details about the property, mention anything special about it, and it drafts a real starting point in seconds. You're not handing off your judgment. You're just skipping the blank page.\n\nBeyond the AI draft, LocalPRO's marketing team designs real, personalized collateral around each listing: photography, video, buyer and seller guides, postcards, social content, and more. We also run a professional podcast studio and a production team, so you can create market updates and educational content without having to figure out lighting and editing on your own.",
+    body: "Every listing needs a description, a caption, maybe a flyer, and writing decent copy from scratch every single time is its own quiet time sink. Give the platform a few details about the property, mention anything special about it, and it drafts a real starting point in seconds. You're not handing off your judgment. You're just skipping the blank page.",
+    items: [
+      { label: "Photography & Video", detail: "Professional media assets captured to make your listing stand out from the first impression." },
+      { label: "Guides & Collateral", detail: "Buyer/seller guides, postcards, and custom social content generated for every property." },
+      { label: "Podcast Studio", detail: "A professional recording setup so you can produce high-quality audio and video market updates." },
+      { label: "Production Team", detail: "Full post-production editing and production support so you don't have to figure it out yourself." },
+    ],
     demo: "ai-marketing",
   },
   {
@@ -85,8 +91,7 @@ export const SECTIONS = [
     id: "heart",
     eyebrow: "Culture determines how the platform feels",
     title: "H.E.A.R.T.",
-    body: "Systems create consistency. Our culture determines how people experience it. Around here, we call it back to back: we have one another's backs, celebrate wins together, and step in when someone needs help. It's also why LocalPRO was voted a Top Workplace in DFW by The Dallas Morning News, two years running.",
-    badges: ["/award-dfw-2024.png", "/award-dfw-2025.png"],
+    body: "Systems create consistency. Our culture determines how people experience it. Around here, we call it back to back: we have one another's backs, celebrate wins together, and step in when someone needs help.",
     videoNote: "[[Trisha — standards & culture beat]]",
     heart: [
       { letter: "H", word: "Honor", detail: "Value every voice" },
@@ -95,6 +100,12 @@ export const SECTIONS = [
       { letter: "R", word: "Reliability", detail: "Keep the promise" },
       { letter: "T", word: "Transparency", detail: "Create clarity" },
     ],
+  },
+  {
+    id: "recognition",
+    eyebrow: "Recognized",
+    title: "Two years running.",
+    badges: ["/award-dfw-2024.png", "/award-dfw-2025.png"],
   },
   {
     id: "built-for-next",

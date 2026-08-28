@@ -118,11 +118,24 @@ export function AIMarketingDemo({
   return (
     <SectionShell id={data.id}>
       <EditorialHeader
-        align="center"
+        align="left"
         eyebrow={data.eyebrow}
         title={data.title}
         body={"body" in data ? data.body : undefined}
       />
+
+      {"items" in data && data.items && (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-10 max-w-4xl mx-auto w-full select-none">
+          {(data.items as any).map((item: any, i: number) => (
+            <Reveal key={item.label} delay={0.1 + i * 0.08}>
+              <div className="p-4 rounded-xl bg-lp-card border border-lp-border h-full">
+                <p className="text-lp-gold text-sm font-semibold tracking-wide mb-1">{item.label}</p>
+                <p className="text-lp-grey text-xs md:text-sm leading-snug">{item.detail}</p>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      )}
 
       <Reveal delay={0.2}>
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 mt-12 items-start max-w-4xl mx-auto text-lp-smoke">
