@@ -68,7 +68,11 @@ export function EditorialHeader({
       </Reveal>
       {body && (
         <Reveal delay={0.16}>
-          <p className="text-base md:text-lg text-lp-grey max-w-3xl">{parseGlossaryTerms(body)}</p>
+          <div className={`text-base md:text-lg text-lp-grey max-w-3xl flex flex-col gap-4 ${align === "center" ? "text-center" : "text-left"}`}>
+            {body.split("\n\n").map((para, i) => (
+              <p key={i}>{parseGlossaryTerms(para)}</p>
+            ))}
+          </div>
         </Reveal>
       )}
       {sub && (

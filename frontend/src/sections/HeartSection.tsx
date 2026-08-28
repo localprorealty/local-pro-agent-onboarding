@@ -46,6 +46,18 @@ export function HeartSection({ data }: { data: SectionData }) {
           body={"body" in data ? data.body : undefined}
           videoNote={"videoNote" in data ? data.videoNote : undefined}
         />
+        {"badges" in data && data.badges && (
+          <div className="flex justify-center gap-6 mt-8 shrink-0">
+            {(data.badges as any).map((src: string, i: number) => (
+              <img
+                key={i}
+                src={src}
+                alt="DFW Top Workplace Award"
+                className="h-14 md:h-16 w-auto object-contain opacity-85 hover:opacity-100 transition-opacity"
+              />
+            ))}
+          </div>
+        )}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mt-12">
           {letters.map((h) => (
             <div
@@ -123,6 +135,19 @@ export function HeartSection({ data }: { data: SectionData }) {
             );
           })}
         </div>
+
+        {"badges" in data && data.badges && (
+          <div className="flex justify-center gap-6 mt-8 shrink-0 select-none">
+            {(data.badges as any).map((src: string, i: number) => (
+              <img
+                key={i}
+                src={src}
+                alt="DFW Top Workplace Award"
+                className="h-14 md:h-16 w-auto object-contain opacity-85 hover:opacity-100 transition-opacity"
+              />
+            ))}
+          </div>
+        )}
 
       </div>
     </section>

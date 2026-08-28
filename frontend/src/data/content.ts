@@ -1,9 +1,9 @@
 // All copy here is sourced or adapted from:
 // - LOCALPRO_RECRUITING_BROCHURE
 // - LocalPRO_Performance_First_Homeowner_Continuity_Recruiting_Deck
-// - LocalPRO_Recruiting_Visual_Storyboard (Deana / Trisha / Robert beats)
+// - LocalPRO_Recruiting_Visual_Storyboard (Deana Custer / Trisha / Robert beats)
 // Placeholder [[bracketed]] notes mark where real production assets
-// (Deana/Trisha/Robert video, real product screenshots) slot in later.
+// (Deana Custer/Trisha/Robert video, real product screenshots) slot in later.
 
 export const SECTIONS = [
   {
@@ -41,7 +41,7 @@ export const SECTIONS = [
     id: "ai-marketing",
     eyebrow: "Marketing, with an AI teammate",
     title: "We don't just give you tools. We give you a teammate that never sleeps.",
-    body: "Every listing needs a description, a caption, maybe a flyer, and writing decent copy from scratch every single time is its own quiet time sink. Give the platform a few details about the property, mention anything special about it, and it drafts a real starting point in seconds. You're not handing off your judgment. You're just skipping the blank page.",
+    body: "Every listing needs a description, a caption, maybe a flyer, and writing decent copy from scratch every single time is its own quiet time sink. Give the platform a few details about the property, mention anything special about it, and it drafts a real starting point in seconds. You're not handing off your judgment. You're just skipping the blank page.\n\nBeyond the AI draft, LocalPRO's marketing team designs real, personalized collateral around each listing: photography, video, buyer and seller guides, postcards, social content, and more. We also run a professional podcast studio and a production team, so you can create market updates and educational content without having to figure out lighting and editing on your own.",
     demo: "ai-marketing",
   },
   {
@@ -62,7 +62,7 @@ export const SECTIONS = [
     id: "performance-first",
     eyebrow: "Performance First",
     title: "People, technology, services and accountability: aligned.",
-    body: "This is where everything you've scrolled through so far connects: the platform, the demos, the coaching. It's not a separate thing bolted on. It's the standard LocalPRO holds itself to, agents and leadership both.",
+    body: "This is where everything you've scrolled through so far connects: the platform, the demos, the coaching. It's not a separate thing bolted on. It's the standard LocalPRO holds itself to, agents and leadership both. That includes a real rhythm of development: classroom training, continuing education, masterminds, coaching, and PRO Labs, plus LocalPRO Live, our weekly podcast to start the week informed. Our CRM, IDX, AI engagement tools, and the LocalPRO app extend your capacity, while the Agent Hub and our service network (sign coordination, showing assistance, Seller Shield, transaction coordination) cover the practical stuff you'd otherwise have to track down yourself. And when a decision isn't obvious, experienced broker leadership is genuinely reachable, not just a name on an org chart.",
     videoNote: "[[Robert - training & coaching beat]]",
     video: { src: "/videos/clip3-performance.mp4", gatesScroll: true },
   },
@@ -70,7 +70,7 @@ export const SECTIONS = [
     id: "revenue-share-explain",
     eyebrow: "Growth beyond closings",
     title: "Here's how sponsoring another agent actually pays you.",
-    body: "When you help someone join LocalPRO, a friend, someone you mentored, a new agent you recruited, you become their sponsor. Every time they close a deal, LocalPRO keeps a portion of it, and a slice of that comes back to you automatically, for as long as they're still working toward their yearly cap. The more agents you've sponsored, and the further along they are in their cap, the bigger your slice. You don't do any extra work for this. It's a reward for helping someone else succeed.",
+    body: "When you help someone join LocalPRO, a friend, someone you mentored, a new agent you recruited, you become their sponsor. Every time they close a deal, LocalPRO keeps a portion of it, and a slice of that comes back to you automatically, for as long as they're still working toward their yearly cap. The more agents you've sponsored, and the further along they are in their cap, the bigger your slice. You don't do any extra work for this. It's a reward for helping someone else succeed. Growth here isn't limited to residential transactions, either. Agents also have access to commercial real estate, referrals, property management, and, coming soon, LocalPRO Mortgage, extra ways to stay useful to a client whose needs move beyond a typical sale, without losing the relationship yourself.",
     videoNote: "[[Robert continues]]",
     video: { src: "/videos/clip4-revshare.mp4", gatesScroll: true },
   },
@@ -85,7 +85,8 @@ export const SECTIONS = [
     id: "heart",
     eyebrow: "Culture determines how the platform feels",
     title: "H.E.A.R.T.",
-    body: "Systems create consistency. Our culture determines how people experience it.",
+    body: "Systems create consistency. Our culture determines how people experience it. Around here, we call it back to back: we have one another's backs, celebrate wins together, and step in when someone needs help. It's also why LocalPRO was voted a Top Workplace in DFW by The Dallas Morning News, two years running.",
+    badges: ["/award-dfw-2024.png", "/award-dfw-2025.png"],
     videoNote: "[[Trisha — standards & culture beat]]",
     heart: [
       { letter: "H", word: "Honor", detail: "Value every voice" },
@@ -107,7 +108,7 @@ export const SECTIONS = [
     id: "close",
     eyebrow: "Inspired by a Dream. Empowered by LocalPRO.",
     title: "You bring the ambition. We bring the platform.",
-    videoNote: "[[Deana - closing bookend, ~10-12s]]",
+    videoNote: "[[Deana Custer - closing bookend, ~10-12s]]",
   },
   {
     id: "form",
