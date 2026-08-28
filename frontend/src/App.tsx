@@ -28,7 +28,9 @@ export default function App() {
   const handleToggleAutoScroll = () => {
     setIsCreepPausedUser((prev) => {
       const next = !prev;
-      if (!next) {
+      if (next) {
+        window.dispatchEvent(new CustomEvent("pause-creep"));
+      } else {
         window.dispatchEvent(new CustomEvent("resume-creep"));
       }
       return next;
@@ -337,6 +339,7 @@ export default function App() {
     };
 
     const startCreep = () => {
+      if (isCreepPausedUserRef.current) return;
       if (isCreepActiveRef.current) return;
       isCreepActiveRef.current = true;
       creepScroll();
@@ -405,6 +408,14 @@ export default function App() {
       startCreep();
     };
 
+    const handlePauseCreep = () => {
+      console.log("[AUTO-SCROLL] Manual pause requested. Stopping creep.");
+      stopCreep();
+      if (idleTimeout) {
+        clearTimeout(idleTimeout);
+      }
+    };
+
     // Listen to standard interaction events
     window.addEventListener("mousemove", handleMouseMove);
     window.addEventListener("mousedown", handleActivity);
@@ -413,6 +424,7 @@ export default function App() {
     window.addEventListener("touchmove", handleActivity, { passive: true });
     window.addEventListener("ended", handleVideoEnded, true);
     window.addEventListener("resume-creep", handleResumeCreep);
+    window.addEventListener("pause-creep", handlePauseCreep);
 
     // Start timer on mount
     resetIdleTimer();
@@ -429,6 +441,7 @@ export default function App() {
       window.removeEventListener("touchmove", handleActivity);
       window.removeEventListener("ended", handleVideoEnded, true);
       window.removeEventListener("resume-creep", handleResumeCreep);
+      window.removeEventListener("pause-creep", handlePauseCreep);
     };
   }, []);
 
