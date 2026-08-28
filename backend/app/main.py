@@ -2,6 +2,7 @@ import os
 import time
 import logging
 import httpx
+import asyncio
 from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from groq import Groq
@@ -255,26 +256,53 @@ def normalize_state_abbrev(state: str) -> str:
         return val.upper()
     return STATE_ABBREVIATIONS.get(val, state)
 
+class NominatimThrottler:
+    def __init__(self):
+        self._lock = None
+        self.last_request_time = 0.0
+
+    @property
+    def lock(self) -> asyncio.Lock:
+        if self._lock is None:
+            self._lock = asyncio.Lock()
+        return self._lock
+
+    async def throttle(self):
+        async with self.lock:
+            now = time.time()
+            elapsed = now - self.last_request_time
+            if elapsed < 1.0:
+                await asyncio.sleep(1.0 - elapsed)
+            self.last_request_time = time.time()
+
+nominatim_throttler = NominatimThrottler()
+
 @app.get("/address-suggest")
 async def address_suggest(request: Request, q: str = ""):
     """
     GET /address-suggest?q=<query>
-    Proxies to Photon's open-source geocoding API,
+    Proxies to OpenStreetMap's Nominatim Search API,
     filtering for US results and returning a cleaned trimmed list.
+    Enforces a global 1 req/second rate-limit on upstream requests.
     """
     check_rate_limit(request, "address-suggest", 30)
     
     if not q or len(q.strip()) < 3:
         return {"items": []}
 
-    url = "https://photon.komoot.io/api"
+    # Enforce global 1 req/sec limit to Nominatim
+    await nominatim_throttler.throttle()
+
+    url = "https://nominatim.openstreetmap.org/search"
     params = {
         "q": q.strip(),
         "limit": "10",
-        "countrycode": "US"
+        "countrycodes": "us",
+        "addressdetails": "1",
+        "format": "json"
     }
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        "User-Agent": "LocalProOnboarding/1.0 (contact@localprorealty.com)"
     }
 
     try:
@@ -283,30 +311,42 @@ async def address_suggest(request: Request, q: str = ""):
             response.raise_for_status()
             res_data = response.json()
             
-        features = res_data.get("features", [])
         suggestions = []
         
-        for feature in features:
-            properties = feature.get("properties", {})
+        for item in res_data:
+            address = item.get("address", {})
             
-            street = properties.get("street", "").strip()
-            city = properties.get("city", "").strip()
-            state = properties.get("state", "").strip()
-            state_abbr = normalize_state_abbrev(state)
+            # Extract fields
+            house_number = address.get("house_number", "").strip()
+            # Nominatim usually returns the street name in 'road', fallback to 'street' or properties.name/display_name
+            street = address.get("road", address.get("street", "")).strip()
             
-            house_number = properties.get("housenumber", "").strip()
-            postal_code = properties.get("postcode", "").strip()
-            if postal_code and "-" in postal_code:
-                postal_code = postal_code.split("-")[0].strip()
-                
+            # Fallback if both house_number and street are missing in structured address details
+            # e.g., if it's a street feature and OSM didn't structure it, or we parsed a place name
+            if not street:
+                display_name = item.get("display_name", "")
+                if display_name:
+                    parts = [p.strip() for p in display_name.split(",")]
+                    if parts:
+                        street = parts[0]
+            
             if house_number and street:
                 address_line_1 = f"{house_number} {street}"
             elif street:
                 address_line_1 = street
             else:
+                # If we still have absolutely no street-level info, skip it
                 continue
                 
-            country = properties.get("country", "").strip()
+            city = address.get("city", address.get("town", address.get("village", address.get("suburb", "")))).strip()
+            state = address.get("state", "").strip()
+            state_abbr = normalize_state_abbrev(state)
+            
+            postal_code = address.get("postcode", "").strip()
+            if postal_code and "-" in postal_code:
+                postal_code = postal_code.split("-")[0].strip()
+                
+            country = address.get("country", "").strip()
             country_label = "USA" if country.lower() in ("united states", "us", "usa") else country
             
             # Form clean address label
@@ -328,13 +368,13 @@ async def address_suggest(request: Request, q: str = ""):
         return {"items": suggestions}
         
     except httpx.HTTPStatusError as exc:
-        logger.error(f"Photon API returned error status {exc.response.status_code}: {exc.response.text}")
+        logger.error(f"Nominatim API returned error status {exc.response.status_code}: {exc.response.text}")
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail="Address suggestion service temporary error."
         )
     except Exception as exc:
-        logger.error(f"Photon API exception: {exc}", exc_info=True)
+        logger.error(f"Nominatim API exception: {exc}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail="Address suggestion service is temporarily unavailable."
