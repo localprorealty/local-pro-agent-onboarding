@@ -8,6 +8,7 @@ interface TooltipProps {
 
 export function Tooltip({ text, children }: TooltipProps) {
   const [visible, setVisible] = useState(false);
+  const [position, setPosition] = useState<"top" | "bottom">("top");
   const containerRef = useRef<HTMLSpanElement>(null);
 
   // Auto-dismiss tooltip on clicking/tapping outside (for mobile support)
@@ -25,6 +26,18 @@ export function Tooltip({ text, children }: TooltipProps) {
     };
   }, []);
 
+  // Check available space when visible
+  useEffect(() => {
+    if (visible && containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      if (rect.top < 120) {
+        setPosition("bottom");
+      } else {
+        setPosition("top");
+      }
+    }
+  }, [visible]);
+
   return (
     <span
       ref={containerRef}
@@ -37,16 +50,27 @@ export function Tooltip({ text, children }: TooltipProps) {
       <AnimatePresence>
         {visible && (
           <motion.span
-            initial={{ opacity: 0, scale: 0.95, y: 5 }}
+            initial={{ opacity: 0, scale: 0.95, y: position === "top" ? 5 : -5 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 5 }}
+            exit={{ opacity: 0, scale: 0.95, y: position === "top" ? 5 : -5 }}
             transition={{ duration: 0.15 }}
-            className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-3 rounded-lg bg-lp-card border border-lp-border shadow-2xl text-xs text-lp-smoke leading-normal z-50 text-center font-normal pointer-events-none"
+            className={`absolute left-1/2 -translate-x-1/2 w-64 p-3 rounded-lg bg-lp-card border border-lp-border shadow-2xl text-xs text-lp-smoke leading-normal z-50 text-center font-normal pointer-events-none ${
+              position === "top" ? "bottom-full mb-2" : "top-full mt-2"
+            }`}
           >
             {text}
             {/* Tooltip arrow */}
-            <span className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-lp-card" />
-            <span className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-lp-border mt-[1px] -z-10" />
+            {position === "top" ? (
+              <>
+                <span className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-lp-card" />
+                <span className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-lp-border mt-[1px] -z-10" />
+              </>
+            ) : (
+              <>
+                <span className="absolute bottom-full left-1/2 -translate-x-1/2 border-4 border-transparent border-b-lp-card" />
+                <span className="absolute bottom-full left-1/2 -translate-x-1/2 border-4 border-transparent border-b-lp-border mb-[1px] -z-10" />
+              </>
+            )}
           </motion.span>
         )}
       </AnimatePresence>

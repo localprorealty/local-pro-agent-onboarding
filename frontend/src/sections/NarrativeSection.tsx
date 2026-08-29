@@ -11,7 +11,6 @@ export function NarrativeSection({ data, align = "left" }: { data: SectionData; 
         eyebrow={data.eyebrow}
         title={data.title}
         body={"body" in data ? data.body : undefined}
-        videoNote={"videoNote" in data ? data.videoNote : undefined}
       />
       {"video" in data && data.video && (
         <div className="w-full flex flex-col items-center gap-6 mt-8">

@@ -44,9 +44,7 @@ export function HeroSection({ data }: { data: SectionData }) {
   const subOpacity = useTransform(scrollYProgress, [0.38, 0.46, 0.48, 0.55], [0, 1, 1, 0]);
   const subY = useTransform(scrollYProgress, [0.38, 0.46], [20, 0]);
 
-  // VideoNote (crosses 70% - 90%)
-  const videoNoteOpacity = useTransform(scrollYProgress, [0.7, 0.9], [0, 1]);
-  const videoNoteY = useTransform(scrollYProgress, [0.7, 0.9], [20, 0]);
+
 
   // Text container translates up cleanly before video enters
   const textY = useTransform(scrollYProgress, [0.35, 0.55], [0, -240]);
@@ -65,7 +63,6 @@ export function HeroSection({ data }: { data: SectionData }) {
           title={data.title}
           body={"body" in data ? data.body : undefined}
           sub={"sub" in data ? data.sub : undefined}
-          videoNote={"videoNote" in data ? data.videoNote : undefined}
         />
         {"video" in data && data.video && (
           <div className="w-full flex justify-center mt-8">
@@ -146,16 +143,6 @@ export function HeroSection({ data }: { data: SectionData }) {
               </motion.p>
             )}
           </motion.div>
-
-          {/* VideoNote */}
-          {"videoNote" in data && (
-            <motion.div
-              style={{ opacity: videoNoteOpacity, y: videoNoteY }}
-              className="mt-2 px-3 py-1.5 rounded-md border border-dashed border-lp-border text-[11px] text-lp-grey font-body"
-            >
-              {data.videoNote}
-            </motion.div>
-          )}
         </div>
 
         {/* Video */}

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { TreatButton } from "./TreatButton";
 import { TraitCard } from "./TraitCard";
 import { ChatPanel } from "./ChatPanel";
@@ -63,18 +63,15 @@ export function NorthDock() {
               aria-label="Chat with North"
             >
               <div className="absolute inset-0 flex items-center justify-center p-0.5">
-                <AnimatePresence mode="popLayout">
-                  <motion.img
-                    key={activeImage}
-                    src={activeImage}
-                    alt="North the guide"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.4 }}
-                    className="w-full h-full object-cover rounded-full"
-                  />
-                </AnimatePresence>
+                <img
+                  src="/LPR-icon.png"
+                  alt="Chat with North"
+                  className="w-full h-full object-cover rounded-full"
+                  onError={(e) => {
+                    // Fallback to activeImage (/2.png) if LPR-icon.png hasn't been uploaded by user yet
+                    (e.target as HTMLImageElement).src = activeImage;
+                  }}
+                />
               </div>
 
               {reacting && (

@@ -44,7 +44,6 @@ export function HeartSection({ data }: { data: SectionData }) {
           eyebrow={data.eyebrow}
           title={data.title}
           body={"body" in data ? data.body : undefined}
-          videoNote={"videoNote" in data ? data.videoNote : undefined}
         />
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mt-12">
           {letters.map((h) => (

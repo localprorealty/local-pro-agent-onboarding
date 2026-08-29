@@ -20,6 +20,14 @@ export default function App() {
 
   const [isCreepPausedUser, setIsCreepPausedUser] = useState(false);
   const isCreepPausedUserRef = useRef(false);
+  const [debugGaps, setDebugGaps] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("debug") === "gaps") {
+      setDebugGaps(true);
+    }
+  }, []);
 
   useEffect(() => {
     isCreepPausedUserRef.current = isCreepPausedUser;
@@ -130,7 +138,10 @@ export default function App() {
 
       if (velocity < 0.15) {
         snapTimeout = setTimeout(() => {
-          if (isSnapping) return;
+          if (isSnapping) {
+            console.log("[AUTO-SCROLL DEBUG] already snapping, skipping snap check");
+            return;
+          }
 
           const vh = window.innerHeight;
           const threshold = 0.18 * vh;
@@ -155,12 +166,16 @@ export default function App() {
             }
           }
 
+          console.log(`[AUTO-SCROLL DEBUG] snap check: scroll: ${scroll.toFixed(1)}, closest: ${closest}, minDiff: ${minDiff.toFixed(1)}, threshold: ${threshold.toFixed(1)}`);
+
           if (minDiff > 2 && minDiff < threshold) {
+            console.log(`[AUTO-SCROLL DEBUG] snapping: triggering scrollTo to ${closest} (diff: ${minDiff.toFixed(1)})`);
             isSnapping = true;
             lenisInstance.scrollTo(closest, {
               duration: 0.7,
               easing: (t: number) => (t === 1 ? 1 : 1 - Math.pow(2, -10 * t)),
               onComplete: () => {
+                console.log("[AUTO-SCROLL DEBUG] snap complete");
                 isSnapping = false;
               },
             });
@@ -186,15 +201,29 @@ export default function App() {
     const isCreepActiveRef = { current: false };
 
     const isUserInExclusionZone = () => {
+      let activeSectionId = "unknown";
+      const vh = window.innerHeight;
+      const allSections = document.querySelectorAll('section, [id]');
+      for (const el of Array.from(allSections)) {
+        if (el.id) {
+          const rect = el.getBoundingClientRect();
+          if (rect.top <= vh / 2 && rect.bottom >= vh / 2) {
+            activeSectionId = el.id;
+            break;
+          }
+        }
+      }
+
       // 0. Check if user paused creep manually
       if (isCreepPausedUserRef.current) {
+        console.log(`[AUTO-SCROLL DEBUG] paused: manual pause. scrollY: ${window.scrollY}, activeSection: ${activeSectionId}`);
         return true;
       }
 
       // 1. Check if chat panel is open (only matches the dialog when active, not the persistent dock button)
       const isChatOpen = !!document.querySelector('div[role="dialog"][aria-label="Chat with North"]');
       if (isChatOpen) {
-        console.log("[AUTO-SCROLL] Paused: Chat panel is currently open");
+        console.log(`[AUTO-SCROLL DEBUG] paused: chat panel open. scrollY: ${window.scrollY}, activeSection: ${activeSectionId}`);
         return true;
       }
 
@@ -204,11 +233,9 @@ export default function App() {
         active &&
         active.closest("#revenue-calculator, #platform-demo, #ai-marketing, #form, #close")
       ) {
-        console.log("[AUTO-SCROLL] Paused: User is interacting with input inside section:", active);
+        console.log(`[AUTO-SCROLL DEBUG] paused: interactive focus inside ${active.closest("#revenue-calculator, #platform-demo, #ai-marketing, #form, #close")?.id}. focused element:`, active, `scrollY: ${window.scrollY}, activeSection: ${activeSectionId}`);
         return true;
       }
-
-
 
       // 4. Check if any gated video's section is active and the video has not ended
       const gatedVideos = document.querySelectorAll('video[data-gates-scroll="true"]');
@@ -217,7 +244,6 @@ export default function App() {
           const sectionEl = video.closest('section');
           if (sectionEl) {
             const rect = sectionEl.getBoundingClientRect();
-            const vh = window.innerHeight;
             // Check if section is active (occupies center of viewport)
             const isSectionActive = rect.top <= vh / 2 && rect.bottom >= vh / 2;
             
@@ -228,13 +254,15 @@ export default function App() {
               const maxScroll = rect.height - vh;
               const progress = maxScroll > 0 ? -rect.top / maxScroll : 0;
               if (isSectionActive && progress >= 0.58) {
-                console.log(`[AUTO-SCROLL] Paused: Hero gated video is active and visible (progress: ${progress.toFixed(2)})`);
+                const videoRect = video.getBoundingClientRect();
+                console.log(`[AUTO-SCROLL DEBUG] paused: Hero video active (progress: ${progress.toFixed(2)}). scrollY: ${window.scrollY}, activeSection: ${activeSectionId}, videoRect:`, { top: videoRect.top, left: videoRect.left, width: videoRect.width, height: videoRect.height });
                 return true;
               }
             } else {
               // For other sections, block immediately when the section becomes active
               if (isSectionActive) {
-                console.log(`[AUTO-SCROLL] Paused: Gated video section ${sectionEl.id} is active and incomplete`);
+                const videoRect = video.getBoundingClientRect();
+                console.log(`[AUTO-SCROLL DEBUG] paused: Gated video in section ${sectionEl.id} is active. scrollY: ${window.scrollY}, activeSection: ${activeSectionId}, videoRect:`, { top: videoRect.top, left: videoRect.left, width: videoRect.width, height: videoRect.height });
                 return true;
               }
             }
@@ -273,6 +301,25 @@ export default function App() {
               activeSection = section;
               break;
             }
+          }
+        }
+
+        // Part 3a: Runtime getBoundingClientRect log for active video
+        const activeSectionEl = document.getElementById(activeSection.id);
+        if (activeSectionEl) {
+          const videoInActiveSection = activeSectionEl.querySelector('video');
+          if (videoInActiveSection) {
+            const vRect = videoInActiveSection.getBoundingClientRect();
+            console.log(`[AUTO-SCROLL DEBUG] Video in active section ${activeSection.id} rect:`, {
+              top: vRect.top,
+              left: vRect.left,
+              bottom: vRect.bottom,
+              right: vRect.right,
+              width: vRect.width,
+              height: vRect.height,
+              viewportWidth: window.innerWidth,
+              viewportHeight: window.innerHeight
+            });
           }
         }
 
@@ -525,7 +572,7 @@ export default function App() {
         </span>
       </button>
 
-      <GoogleAuthProvider>
+       <GoogleAuthProvider>
         <main>
           {SECTIONS.map((section) => (
             <SectionRouter
@@ -537,6 +584,90 @@ export default function App() {
           ))}
         </main>
       </GoogleAuthProvider>
+
+      {debugGaps && <GapDebugOverlay />}
+    </div>
+  );
+}
+
+interface GapInfo {
+  id: string;
+  index: number;
+  offsetTop: number;
+  offsetHeight: number;
+  gapToNext: number | null;
+}
+
+function GapDebugOverlay() {
+  const [gaps, setGaps] = useState<GapInfo[]>([]);
+
+  useEffect(() => {
+    const updateGaps = () => {
+      const newGaps: GapInfo[] = [];
+      for (let i = 0; i < SECTIONS.length; i++) {
+        const id = SECTIONS[i].id;
+        const el = document.getElementById(id);
+        if (el) {
+          const offsetTop = el.offsetTop;
+          const offsetHeight = el.offsetHeight;
+          let gapToNext: number | null = null;
+          
+          if (i < SECTIONS.length - 1) {
+            const nextId = SECTIONS[i + 1].id;
+            const nextEl = document.getElementById(nextId);
+            if (nextEl) {
+              gapToNext = nextEl.offsetTop - (offsetTop + offsetHeight);
+            }
+          }
+
+          newGaps.push({
+            id,
+            index: i + 1,
+            offsetTop,
+            offsetHeight,
+            gapToNext,
+          });
+        }
+      }
+      setGaps(newGaps);
+    };
+
+    updateGaps();
+    window.addEventListener("resize", updateGaps);
+    window.addEventListener("scroll", updateGaps);
+    const interval = setInterval(updateGaps, 1000);
+
+    return () => {
+      window.removeEventListener("resize", updateGaps);
+      window.removeEventListener("scroll", updateGaps);
+      clearInterval(interval);
+    };
+  }, []);
+
+  return (
+    <div className="absolute inset-0 pointer-events-none z-[9999]">
+      {gaps.map((g) => (
+        <div
+          key={g.id}
+          className="absolute left-6 font-mono font-bold text-xs"
+          style={{ top: `${g.offsetTop + 12}px` }}
+        >
+          {/* Section Number Badge */}
+          <span className="bg-lp-gold text-lp-bg px-2.5 py-1 rounded shadow-lg border border-lp-border flex items-center gap-1.5 pointer-events-auto">
+            <span>Section {g.index}: <span className="underline">{g.id}</span></span>
+          </span>
+
+          {/* Gap Badge */}
+          {g.gapToNext !== null && (
+            <span
+              className="absolute left-0 bg-red-600/95 text-white px-2 py-0.5 rounded shadow-lg border border-red-500 flex items-center pointer-events-auto"
+              style={{ top: `${g.offsetHeight}px`, transform: "translateY(-50%)" }}
+            >
+              Gap to next: {g.gapToNext}px
+            </span>
+          )}
+        </div>
+      ))}
     </div>
   );
 }

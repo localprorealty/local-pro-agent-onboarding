@@ -2,8 +2,8 @@
 // - LOCALPRO_RECRUITING_BROCHURE
 // - LocalPRO_Performance_First_Homeowner_Continuity_Recruiting_Deck
 // - LocalPRO_Recruiting_Visual_Storyboard (Deana Custer / Trisha / Robert beats)
-// Placeholder [[bracketed]] notes mark where real production assets
-// (Deana Custer/Trisha/Robert video, real product screenshots) slot in later.
+// Header notes mark where real production assets
+// (Deana Custer/Trisha/Robert video, real product screenshots) slot in.
 
 export const SECTIONS = [
   {
@@ -69,7 +69,6 @@ export const SECTIONS = [
     eyebrow: "Performance First",
     title: "People, technology, services and accountability: aligned.",
     body: "This is where everything you've scrolled through so far connects: the platform, the demos, the coaching. It's not a separate thing bolted on. It's the standard LocalPRO holds itself to, agents and leadership both. That includes a real rhythm of development: classroom training, continuing education, masterminds, coaching, and PRO Labs, plus LocalPRO Live, our weekly podcast to start the week informed. Our CRM, IDX, AI engagement tools, and the LocalPRO app extend your capacity, while the Agent Hub and our service network (sign coordination, showing assistance, Seller Shield, transaction coordination) cover the practical stuff you'd otherwise have to track down yourself. And when a decision isn't obvious, experienced broker leadership is genuinely reachable, not just a name on an org chart. And yes, it connects to what you're already using, BrokerMint, Lofty, and more, so nothing lives in a separate silo you have to check twice.",
-    videoNote: "[[Robert - training & coaching beat]]",
     video: { src: "/videos/clip4-performance.mp4", gatesScroll: true },
   },
   {
@@ -77,7 +76,6 @@ export const SECTIONS = [
     eyebrow: "Growth beyond closings",
     title: "Here's how sponsoring another agent actually pays you.",
     body: "When you help someone join LocalPRO, a friend, someone you mentored, a new agent you recruited, you become their sponsor. Every time they close a deal, LocalPRO keeps a portion of it, and a slice of that comes back to you automatically, for as long as they're still working toward their yearly cap. The more agents you've sponsored, and the further along they are in their cap, the bigger your slice. You don't do any extra work for this. It's a reward for helping someone else succeed. Growth here isn't limited to residential transactions, either. Agents also have access to commercial real estate, referrals, property management, and, coming soon, LocalPRO Mortgage, extra ways to stay useful to a client whose needs move beyond a typical sale, without losing the relationship yourself.",
-    videoNote: "[[Robert continues]]",
     video: { src: "/videos/clip5-revenue.mp4", gatesScroll: true },
   },
   {
@@ -92,7 +90,6 @@ export const SECTIONS = [
     eyebrow: "Culture determines how the platform feels",
     title: "H.E.A.R.T.",
     body: "Systems create consistency. Our culture determines how people experience it. Around here, we call it back to back: we have one another's backs, celebrate wins together, and step in when someone needs help.",
-    videoNote: "[[Trisha — standards & culture beat]]",
     heart: [
       { letter: "H", word: "Honor", detail: "Value every voice" },
       { letter: "E", word: "Excellence", detail: "Raise the standard" },
@@ -119,7 +116,6 @@ export const SECTIONS = [
     id: "close",
     eyebrow: "Inspired by a Dream. Empowered by LocalPRO.",
     title: "You bring the ambition. We bring the platform.",
-    videoNote: "[[Deana Custer - closing bookend, ~10-12s]]",
   },
   {
     id: "form",
