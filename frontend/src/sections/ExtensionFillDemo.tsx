@@ -64,20 +64,26 @@ export function ExtensionFillDemo({ data, sharedMlsData }: ExtensionFillDemoProp
   }, [sharedMlsData]);
 
   useEffect(() => {
+    // Always clear form when activeProperty changes (so user starts fresh)
+    setPropertySubType("");
+    setHousingType([]);
+    setYearBuilt("");
+    setLivingArea("");
+    setListPrice("");
+    setShowCelebration(false);
+
     if (!activeProperty) {
-      // Reset form if data is cleared
-      setPropertySubType("");
-      setHousingType([]);
-      setYearBuilt("");
-      setLivingArea("");
-      setListPrice("");
       setAutofillProgress("idle");
       setAutofillMessage("Extension standby — waiting for MLS data fetch above");
-      setShowCelebration(false);
-      return;
+    } else {
+      setAutofillProgress("idle");
+      setAutofillMessage("Ready. Click the LocalPRO Extension button in the browser header to autofill.");
     }
+  }, [activeProperty]);
 
-    // Trigger autofill sequence
+  const startAutofill = () => {
+    if (!activeProperty || autofillProgress !== "idle") return;
+
     setAutofillProgress("running");
     setAutofillMessage("Extension connected. Reading MLS record...");
     setShowCelebration(false);
@@ -133,7 +139,7 @@ export function ExtensionFillDemo({ data, sharedMlsData }: ExtensionFillDemoProp
     };
 
     runSequence();
-  }, [activeProperty]);
+  };
 
   const isFlashing = (field: string) => !!activeFlashes[field];
 
@@ -167,18 +173,28 @@ export function ExtensionFillDemo({ data, sharedMlsData }: ExtensionFillDemoProp
               </svg>
             </div>
 
-            {/* Extension indicator pill */}
-            <div className={`text-xs px-2.5 py-1 rounded-full font-semibold flex items-center gap-1.5 transition-all duration-300 ${
-              autofillProgress === "running" ? "bg-lp-gold/20 text-lp-gold border border-lp-gold/40 animate-pulse" :
-              autofillProgress === "completed" ? "bg-green-500/20 text-green-400 border border-green-500/40" :
-              "bg-lp-bg-raised text-lp-grey border border-lp-border"
-            }`}>
+            {/* Extension indicator pill / button */}
+            <button
+              type="button"
+              disabled={!activeProperty || autofillProgress !== "idle"}
+              onClick={startAutofill}
+              className={`text-xs px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1.5 transition-all duration-300 border font-sans cursor-pointer ${
+                !activeProperty 
+                  ? "bg-lp-bg-raised/50 text-lp-grey/40 border-lp-border/30 cursor-not-allowed opacity-50"
+                  : autofillProgress === "running"
+                  ? "bg-lp-gold/20 text-lp-gold border-lp-gold/40 animate-pulse cursor-default"
+                  : autofillProgress === "completed"
+                  ? "bg-green-500/20 text-green-400 border-green-500/40 cursor-default"
+                  : "bg-lp-gold text-lp-bg border-lp-gold shadow-lg hover:scale-105 active:scale-95 animate-pulse"
+              }`}
+            >
               <span className={`w-2 h-2 rounded-full ${
                 autofillProgress === "running" ? "bg-lp-gold animate-ping" :
-                autofillProgress === "completed" ? "bg-green-400" : "bg-lp-grey"
+                autofillProgress === "completed" ? "bg-green-400" : 
+                activeProperty ? "bg-lp-bg" : "bg-lp-grey"
               }`} />
-              <span>LocalPRO Extension</span>
-            </div>
+              <span>{autofillProgress === "completed" ? "Autofilled!" : "LocalPRO Extension"}</span>
+            </button>
           </div>
 
           {/* NTREIS Matrix Branding Header */}
