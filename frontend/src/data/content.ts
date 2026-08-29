@@ -12,7 +12,7 @@ export const SECTIONS = [
     title: "A brokerage should multiply what you do well.",
     body: "Performance during the transaction. Continuity after the closing.",
     sub: "Produce the opportunity. Serve the transaction. Compound the relationship.",
-    video: { src: "/videos/clip1-open.mov", gatesScroll: true },
+    video: { src: "/videos/clip1-open.mp4", gatesScroll: true },
   },
   {
     id: "hidden-weight",
@@ -33,8 +33,8 @@ export const SECTIONS = [
     body: "Easiest to just show you: type a real address below and watch something that normally takes an hour of manual entry happen in seconds.",
     demo: "address-autofill",
     video: [
-      { src: "/videos/clip2-open.mov", gatesScroll: true },
-      { src: "/videos/clip3-open.mov", gatesScroll: true },
+      { src: "/videos/clip2-platform-a.mp4", gatesScroll: true },
+      { src: "/videos/clip3-platform-b.mp4", gatesScroll: true },
     ],
   },
   {
@@ -70,7 +70,7 @@ export const SECTIONS = [
     title: "People, technology, services and accountability: aligned.",
     body: "This is where everything you've scrolled through so far connects: the platform, the demos, the coaching. It's not a separate thing bolted on. It's the standard LocalPRO holds itself to, agents and leadership both. That includes a real rhythm of development: classroom training, continuing education, masterminds, coaching, and PRO Labs, plus LocalPRO Live, our weekly podcast to start the week informed. Our CRM, IDX, AI engagement tools, and the LocalPRO app extend your capacity, while the Agent Hub and our service network (sign coordination, showing assistance, Seller Shield, transaction coordination) cover the practical stuff you'd otherwise have to track down yourself. And when a decision isn't obvious, experienced broker leadership is genuinely reachable, not just a name on an org chart. And yes, it connects to what you're already using, BrokerMint, Lofty, and more, so nothing lives in a separate silo you have to check twice.",
     videoNote: "[[Robert - training & coaching beat]]",
-    video: { src: "/videos/clip3-performance.mp4", gatesScroll: true },
+    video: { src: "/videos/clip4-performance.mp4", gatesScroll: true },
   },
   {
     id: "revenue-share-explain",
@@ -78,7 +78,7 @@ export const SECTIONS = [
     title: "Here's how sponsoring another agent actually pays you.",
     body: "When you help someone join LocalPRO, a friend, someone you mentored, a new agent you recruited, you become their sponsor. Every time they close a deal, LocalPRO keeps a portion of it, and a slice of that comes back to you automatically, for as long as they're still working toward their yearly cap. The more agents you've sponsored, and the further along they are in their cap, the bigger your slice. You don't do any extra work for this. It's a reward for helping someone else succeed. Growth here isn't limited to residential transactions, either. Agents also have access to commercial real estate, referrals, property management, and, coming soon, LocalPRO Mortgage, extra ways to stay useful to a client whose needs move beyond a typical sale, without losing the relationship yourself.",
     videoNote: "[[Robert continues]]",
-    video: { src: "/videos/clip4-revshare.mp4", gatesScroll: true },
+    video: { src: "/videos/clip5-revenue.mp4", gatesScroll: true },
   },
   {
     id: "revenue-calculator",
@@ -112,7 +112,7 @@ export const SECTIONS = [
     eyebrow: "Built for what's next",
     title: "We're not building a bigger version of yesterday's brokerage.",
     body: "Most of what you've just seen, the platform, the coaching, revenue share, didn't exist in real estate ten years ago.",
-    video: { src: "/videos/clip5-next.mp4", gatesScroll: true },
+    video: { src: "/videos/clip6-close.mp4", gatesScroll: true },
     creepSpeedMultiplier: 0.5,
   },
   {
