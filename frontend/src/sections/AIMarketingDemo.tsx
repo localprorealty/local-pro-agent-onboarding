@@ -43,6 +43,28 @@ export function AIMarketingDemo({
   const [result, setResult] = useState<{ description: string; socialCaption: string } | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setPrefersReducedMotion(mediaQuery.matches);
+    const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
+    mediaQuery.addEventListener("change", handler);
+    return () => mediaQuery.removeEventListener("change", handler);
+  }, []);
+
+  // Trigger celebration on successful result generation
+  useEffect(() => {
+    if (result) {
+      setShowCelebration(true);
+      const timer = setTimeout(() => {
+        setShowCelebration(false);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [result]);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Sync with shared MLS state if looked up
@@ -84,6 +106,7 @@ export function AIMarketingDemo({
     setGenerating(true);
     setErrorMsg(null);
     setResult(null);
+    setShowCelebration(false);
 
     try {
       const apiBase = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000";
@@ -318,6 +341,31 @@ export function AIMarketingDemo({
                         {result.socialCaption}
                       </div>
                     </div>
+
+                    {/* Celebration Indicator */}
+                    <AnimatePresence>
+                      {showCelebration && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 5 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.4 }}
+                          className="p-3 rounded-lg bg-lp-gold/5 border border-lp-gold/20 flex flex-col items-center justify-center text-center gap-1.5 relative overflow-hidden"
+                        >
+                          {!prefersReducedMotion && (
+                            <motion.div
+                              initial={{ opacity: 0.8, scale: 0.8 }}
+                              animate={{ opacity: 0, scale: 1.5 }}
+                              transition={{ duration: 1.2, ease: "easeOut" }}
+                              className="absolute inset-0 bg-lp-gold/25 rounded-lg pointer-events-none"
+                            />
+                          )}
+                          <span className="text-lp-gold font-display font-semibold text-xs tracking-wider uppercase">
+                            That's your listing marketing, done in seconds.
+                          </span>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </motion.div>
                 ) : (
                   <motion.div

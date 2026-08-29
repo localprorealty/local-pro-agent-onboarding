@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { SectionShell } from "@/components/SectionShell";
 import { EditorialHeader } from "@/components/EditorialHeader";
 import { Reveal } from "@/components/Reveal";
@@ -13,6 +13,16 @@ interface ParsedAddress {
   zip: string;
   fullAddress: string;
 }
+
+const SAMPLE_LISTING = {
+  "Property Type": "Single Family Home",
+  Bedrooms: "4",
+  Bathrooms: "3.5",
+  "Square Footage": "3,250 sqft",
+  "Lot Size": "0.34 acres",
+  "Year Built": "2018",
+  "List Price": "$675,000",
+};
 
 export function AddressAutofillDemo({
   data,
@@ -31,6 +41,43 @@ export function AddressAutofillDemo({
   const [loadedData, setLoadedData] = useState<Array<{ label: string; value: string }> | null>(null);
   const [revealIndex, setRevealIndex] = useState(-1);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setPrefersReducedMotion(mediaQuery.matches);
+    const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
+    mediaQuery.addEventListener("change", handler);
+    return () => mediaQuery.removeEventListener("change", handler);
+  }, []);
+
+  const handleLoadDemoProperty = () => {
+    setSelectedAddress({
+      line1: "1229 Sam Dennis Dr",
+      city: "Lewisville",
+      state: "TX",
+      zip: "75077",
+      fullAddress: "1229 Sam Dennis Dr, Lewisville, TX 75077, USA",
+    });
+    setQuery("1229 Sam Dennis Dr, Lewisville, TX 75077, USA");
+    setErrorMsg(null);
+    setLoading(true);
+    setLoadedData(null);
+    setRevealIndex(-1);
+
+    setTimeout(() => {
+      setLoading(false);
+      const mapped = Object.entries(SAMPLE_LISTING).map(([label, value]) => ({
+        label,
+        value: String(value),
+      }));
+      setLoadedData(mapped);
+      setSharedMlsData(SAMPLE_LISTING);
+      setRevealIndex(0);
+    }, 1000);
+  };
   
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -127,6 +174,7 @@ export function AddressAutofillDemo({
     setSharedMlsData(null);
     setRevealIndex(-1);
     setErrorMsg(null);
+    setShowCelebration(false);
   };
 
   const handlePullListing = async (e: React.FormEvent) => {
@@ -138,6 +186,7 @@ export function AddressAutofillDemo({
     setSharedMlsData(null);
     setRevealIndex(-1);
     setErrorMsg(null);
+    setShowCelebration(false);
 
     try {
       const apiBase = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000";
@@ -400,13 +449,20 @@ export function AddressAutofillDemo({
 
               {/* No match found fallback */}
               {!loading && !errorMsg && loadedData && loadedData.length === 0 && (
-                <div className="flex flex-col items-center justify-center text-center py-12 gap-2 bg-lp-bg-raised/40 rounded-xl p-4 border border-lp-border/50">
+                <div className="flex flex-col items-center justify-center text-center py-10 gap-3 bg-lp-bg-raised/40 rounded-xl p-6 border border-lp-border/50">
                   <svg className="w-8 h-8 text-lp-gold/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   <p className="text-lp-grey text-sm max-w-xs font-medium">
-                    No active MLS records found for this property address. Try another search.
+                    No active MLS listing found for this address — it may not currently be for sale.
                   </p>
+                  <button
+                    type="button"
+                    onClick={handleLoadDemoProperty}
+                    className="bg-lp-gold/15 text-lp-gold hover:bg-lp-gold/20 border border-lp-gold/30 rounded-lg px-4 py-2 text-xs font-semibold tracking-wide transition-all cursor-pointer font-sans"
+                  >
+                    Try our demo property instead
+                  </button>
                 </div>
               )}
 
@@ -439,6 +495,31 @@ export function AddressAutofillDemo({
                       );
                     })}
                   </div>
+
+                  {/* Celebration Indicator */}
+                  <AnimatePresence>
+                    {showCelebration && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 5 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.4 }}
+                        className="mt-4 p-3 rounded-lg bg-lp-gold/5 border border-lp-gold/20 flex flex-col items-center justify-center text-center gap-1.5 relative overflow-hidden"
+                      >
+                        {!prefersReducedMotion && (
+                          <motion.div
+                            initial={{ opacity: 0.8, scale: 0.8 }}
+                            animate={{ opacity: 0, scale: 1.5 }}
+                            transition={{ duration: 1.2, ease: "easeOut" }}
+                            className="absolute inset-0 bg-lp-gold/25 rounded-lg pointer-events-none"
+                          />
+                        )}
+                        <span className="text-lp-gold font-display font-semibold text-xs tracking-wider uppercase">
+                          See how easy that was?
+                        </span>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               )}
             </div>

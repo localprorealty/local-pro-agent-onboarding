@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { SectionShell } from "@/components/SectionShell";
 import { EditorialHeader } from "@/components/EditorialHeader";
 import type { SectionData } from "@/data/content";
@@ -34,6 +35,27 @@ export function ExtensionFillDemo({ data, sharedMlsData }: ExtensionFillDemoProp
   const [autofillProgress, setAutofillProgress] = useState<"idle" | "running" | "completed">("idle");
   const [autofillMessage, setAutofillMessage] = useState("");
 
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setPrefersReducedMotion(mediaQuery.matches);
+    const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
+    mediaQuery.addEventListener("change", handler);
+    return () => mediaQuery.removeEventListener("change", handler);
+  }, []);
+
+  useEffect(() => {
+    if (autofillProgress === "completed") {
+      setShowCelebration(true);
+      const timer = setTimeout(() => {
+        setShowCelebration(false);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [autofillProgress]);
+
   // Sync with shared MLS state if looked up
   useEffect(() => {
     if (sharedMlsData) {
@@ -51,12 +73,14 @@ export function ExtensionFillDemo({ data, sharedMlsData }: ExtensionFillDemoProp
       setListPrice("");
       setAutofillProgress("idle");
       setAutofillMessage("Extension standby — waiting for MLS data fetch above");
+      setShowCelebration(false);
       return;
     }
 
     // Trigger autofill sequence
     setAutofillProgress("running");
     setAutofillMessage("Extension connected. Reading MLS record...");
+    setShowCelebration(false);
 
     const runSequence = async () => {
       const flash = (field: string, ms = 800) => {
@@ -379,6 +403,31 @@ export function ExtensionFillDemo({ data, sharedMlsData }: ExtensionFillDemoProp
               )}
             </div>
           )}
+
+          {/* Celebration Indicator */}
+          <AnimatePresence>
+            {showCelebration && (
+              <motion.div
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.4 }}
+                className="absolute bottom-16 right-6 z-30 p-3 rounded-lg bg-lp-gold/15 border border-lp-gold/30 backdrop-blur-md flex flex-col items-center justify-center text-center gap-1.5 relative overflow-hidden select-none"
+              >
+                {!prefersReducedMotion && (
+                  <motion.div
+                    initial={{ opacity: 0.8, scale: 0.8 }}
+                    animate={{ opacity: 0, scale: 1.5 }}
+                    transition={{ duration: 1.2, ease: "easeOut" }}
+                    className="absolute inset-0 bg-lp-gold/25 rounded-lg pointer-events-none"
+                  />
+                )}
+                <span className="text-lp-gold font-display font-semibold text-xs tracking-wider uppercase">
+                  That's the whole MLS form, filled for you.
+                </span>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </SectionShell>
