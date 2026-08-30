@@ -226,7 +226,7 @@ export function ExtensionFillDemo({ data, sharedMlsData }: ExtensionFillDemoProp
                 <span className="font-display font-extrabold text-lg tracking-wider text-white">NTREIS</span>
                 <span className="text-xs font-semibold px-2 py-0.5 bg-[#f6b426] text-[#002f5e] rounded-sm font-sans uppercase">Matrix™</span>
               </div>
-              <div className="flex gap-5 text-[11px] font-bold text-white/80 uppercase">
+              <div className="hidden md:flex gap-5 text-[11px] font-bold text-white/80 uppercase">
                 <span>MY MATRIX</span>
                 <span>SEARCH</span>
                 <span>STATS</span>
@@ -248,15 +248,15 @@ export function ExtensionFillDemo({ data, sharedMlsData }: ExtensionFillDemoProp
           <div className="bg-[#fcfdfd] text-[#222222] p-5 flex flex-col flex-grow relative overflow-y-auto font-sans">
             
             {/* Matrix Tab Strip */}
-            <div className="flex border-b border-[#c8d4df] text-xs font-semibold mb-6 select-none shrink-0">
-              <div className="px-4 py-2 border-l border-t border-r border-[#c8d4df] bg-white text-[#002f5e] -mb-[1px] relative z-10 rounded-t-sm border-t-2 border-t-[#002f5e]">
+            <div className="flex border-b border-[#c8d4df] text-xs font-semibold mb-6 select-none shrink-0 overflow-x-auto whitespace-nowrap scrollbar-none">
+              <div className="px-4 py-2 border-l border-t border-r border-[#c8d4df] bg-white text-[#002f5e] -mb-[1px] relative z-10 rounded-t-sm border-t-2 border-t-[#002f5e] shrink-0">
                 Property Info
               </div>
-              <div className="px-4 py-2 text-lp-grey/80 cursor-not-allowed">Location</div>
-              <div className="px-4 py-2 text-lp-grey/80 cursor-not-allowed">Land & Exterior</div>
-              <div className="px-4 py-2 text-lp-grey/80 cursor-not-allowed">Rooms</div>
-              <div className="px-4 py-2 text-lp-grey/80 cursor-not-allowed">Financial & Schools</div>
-              <div className="px-4 py-2 text-lp-grey/80 cursor-not-allowed">Remarks</div>
+              <div className="px-4 py-2 text-lp-grey/80 cursor-not-allowed shrink-0">Location</div>
+              <div className="px-4 py-2 text-lp-grey/80 cursor-not-allowed shrink-0">Land & Exterior</div>
+              <div className="px-4 py-2 text-lp-grey/80 cursor-not-allowed shrink-0">Rooms</div>
+              <div className="px-4 py-2 text-lp-grey/80 cursor-not-allowed shrink-0">Financial & Schools</div>
+              <div className="px-4 py-2 text-lp-grey/80 cursor-not-allowed shrink-0">Remarks</div>
             </div>
 
             {/* Matrix Simulated Form */}
