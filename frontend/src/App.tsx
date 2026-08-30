@@ -103,9 +103,10 @@ export default function App() {
               return true;
             }
           } else {
-            if (isSectionActive) {
-              const videoRect = video.getBoundingClientRect();
-              console.log(`[AUTO-SCROLL DEBUG] paused: Gated video in section ${sectionEl.id} is active. scrollY: ${window.scrollY}, activeSection: ${activeSectionId}, videoRect:`, { top: videoRect.top, left: videoRect.left, width: videoRect.width, height: videoRect.height });
+            const videoRect = video.getBoundingClientRect();
+            const isVideoActive = videoRect.top <= vh / 2 && videoRect.bottom >= vh / 2;
+            if (isVideoActive) {
+              console.log(`[AUTO-SCROLL DEBUG] paused: Gated video in section ${sectionEl.id} is active and centered. scrollY: ${window.scrollY}, activeSection: ${activeSectionId}, videoRect:`, { top: videoRect.top, left: videoRect.left, width: videoRect.width, height: videoRect.height });
               return true;
             }
           }
