@@ -7,7 +7,7 @@ import type { SectionData } from "@/data/content";
 
 export function FormSection({ data }: { data: SectionData }) {
   const { user } = useGoogleAuth();
-  const [name, setName] = useState(() => (window as any).userName || "");
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [submitted, setSubmitted] = useState(false);

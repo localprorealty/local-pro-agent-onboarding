@@ -13,6 +13,7 @@ export default function App() {
   useLenis();
   const [sharedMlsData, setSharedMlsData] = useState<any | null>(null);
   const [showCursor, setShowCursor] = useState(false);
+  const [hasMovedMouse, setHasMovedMouse] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const [hideScrollCue, setHideScrollCue] = useState(false);
   const [lenisInstance, setLenisInstance] = useState<any | null>(null);
@@ -190,6 +191,7 @@ export default function App() {
     window.addEventListener("resize", checkDevice);
 
     const handleMouseMove = (e: MouseEvent) => {
+      setHasMovedMouse(true);
       // Offset by half of cursor size (20px / 2 = 10px) to center it
       mouseX.set(e.clientX - 10);
       mouseY.set(e.clientY - 10);
@@ -543,7 +545,7 @@ export default function App() {
     <div className="relative bg-lp-bg font-body">
       <BrandingBar scrollYProgress={scrollYProgress} />
       {/* Hide standard cursor only on non-touch devices where custom cursor is active */}
-      {showCursor && (
+      {showCursor && hasMovedMouse && (
         <style>{`
           body, button, a, [role="button"], input, select, textarea {
             cursor: none !important;
@@ -552,7 +554,7 @@ export default function App() {
       )}
 
       {/* Global Glowing Custom Cursor */}
-      {showCursor && (
+      {showCursor && hasMovedMouse && (
         <motion.div
           style={{
             x: cursorX,

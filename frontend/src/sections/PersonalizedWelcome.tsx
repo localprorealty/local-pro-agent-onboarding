@@ -1,5 +1,4 @@
-import { SectionShell } from "@/components/SectionShell";
-import { EditorialHeader } from "@/components/EditorialHeader";
+import { Reveal } from "@/components/Reveal";
 
 interface PersonalizedWelcomeProps {
   name: string | null;
@@ -9,18 +8,30 @@ interface PersonalizedWelcomeProps {
 export function PersonalizedWelcome({ name, sharedByName }: PersonalizedWelcomeProps) {
   if (!name) return null;
 
-  const bodyCopy = sharedByName
-    ? `${sharedByName} thought you'd be a great fit here — welcome to LocalPRO. If any of this feels right, the easiest next step is filling out the form below.`
-    : "Deana wanted you to see this yourself — welcome to LocalPRO. If any of this feels like the right fit, the easiest next step is filling out the form below. We'll take it from there.";
+  const isDeana = !sharedByName || sharedByName.toLowerCase() === "deana";
+
+  const bodyCopy = isDeana
+    ? "I wanted you to see this yourself, not just get another cold recruiting message. Take your time looking through this. There's no pressure and no obligation. If something here resonates, the form near the bottom is the easiest way to reach me."
+    : `${sharedByName} thought you might be a good fit for what we're building at LocalPRO, and asked me to send this along directly instead of through a generic recruiting message. Take your time looking through this. There's no pressure and no obligation. If something here resonates, the form near the bottom is the easiest way to reach me.`;
 
   return (
-    <SectionShell id="personalized-welcome" className="min-h-0 py-12">
-      <EditorialHeader
-        align="center"
-        eyebrow="A personal note"
-        title={`Hey ${name}, glad you're here.`}
-        body={bodyCopy}
-      />
-    </SectionShell>
+    <div className="max-w-3xl mx-auto px-6 py-8 w-full select-none" id="personalized-welcome">
+      <Reveal>
+        <div className="p-6 md:p-8 rounded-2xl bg-lp-card border border-lp-border shadow-xl flex flex-col items-center text-center gap-4">
+          <p className="text-xs uppercase tracking-[0.2em] text-lp-gold font-body font-semibold">
+            A note from Deana
+          </p>
+          <h2 className="font-display font-bold text-2xl md:text-3xl leading-tight text-lp-smoke">
+            {name}, glad you found your way here.
+          </h2>
+          <p className="text-sm md:text-base text-lp-grey leading-relaxed max-w-2xl font-body">
+            {bodyCopy}
+          </p>
+          <p className="text-xs italic text-lp-grey/70 mt-2 font-body font-medium">
+            Deana
+          </p>
+        </div>
+      </Reveal>
+    </div>
   );
 }
