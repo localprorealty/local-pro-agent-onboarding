@@ -48,6 +48,74 @@ export default function App() {
 
   const { scrollYProgress } = useScroll();
 
+  const isUserInExclusionZone = () => {
+    let activeSectionId = "unknown";
+    const vh = window.innerHeight;
+    const allSections = document.querySelectorAll('section, [id]');
+    for (const el of Array.from(allSections)) {
+      if (el.id) {
+        const rect = el.getBoundingClientRect();
+        if (rect.top <= vh / 2 && rect.bottom >= vh / 2) {
+          activeSectionId = el.id;
+          break;
+        }
+      }
+    }
+
+    // 0. Check if user paused creep manually
+    if (isCreepPausedUserRef.current) {
+      console.log(`[AUTO-SCROLL DEBUG] paused: manual pause. scrollY: ${window.scrollY}, activeSection: ${activeSectionId}`);
+      return true;
+    }
+
+    // 1. Check if chat panel is open
+    const isChatOpen = !!document.querySelector('div[role="dialog"][aria-label="Chat with North"]');
+    if (isChatOpen) {
+      console.log(`[AUTO-SCROLL DEBUG] paused: chat panel open. scrollY: ${window.scrollY}, activeSection: ${activeSectionId}`);
+      return true;
+    }
+
+    // 2. Check if any input or interactive element is focused inside these sections
+    const active = document.activeElement;
+    if (
+      active &&
+      active.closest("#revenue-calculator, #platform-demo, #ai-marketing, #form, #close")
+    ) {
+      console.log(`[AUTO-SCROLL DEBUG] paused: interactive focus inside ${active.closest("#revenue-calculator, #platform-demo, #ai-marketing, #form, #close")?.id}. focused element:`, active, `scrollY: ${window.scrollY}, activeSection: ${activeSectionId}`);
+      return true;
+    }
+
+    // 4. Check if any gated video's section is active and the video has not ended
+    const gatedVideos = document.querySelectorAll('video[data-gates-scroll="true"]');
+    for (const video of Array.from(gatedVideos) as HTMLVideoElement[]) {
+      if (!video.ended) {
+        const sectionEl = video.closest('section');
+        if (sectionEl) {
+          const rect = sectionEl.getBoundingClientRect();
+          const isSectionActive = rect.top <= vh / 2 && rect.bottom >= vh / 2;
+          
+          if (sectionEl.id === "open") {
+            const maxScroll = rect.height - vh;
+            const progress = maxScroll > 0 ? -rect.top / maxScroll : 0;
+            if (isSectionActive && progress >= 0.58) {
+              const videoRect = video.getBoundingClientRect();
+              console.log(`[AUTO-SCROLL DEBUG] paused: Hero video active (progress: ${progress.toFixed(2)}). scrollY: ${window.scrollY}, activeSection: ${activeSectionId}, videoRect:`, { top: videoRect.top, left: videoRect.left, width: videoRect.width, height: videoRect.height });
+              return true;
+            }
+          } else {
+            if (isSectionActive) {
+              const videoRect = video.getBoundingClientRect();
+              console.log(`[AUTO-SCROLL DEBUG] paused: Gated video in section ${sectionEl.id} is active. scrollY: ${window.scrollY}, activeSection: ${activeSectionId}, videoRect:`, { top: videoRect.top, left: videoRect.left, width: videoRect.width, height: videoRect.height });
+              return true;
+            }
+          }
+        }
+      }
+    }
+
+    return false;
+  };
+
   // Mouse coordinates using MotionValues
   const mouseX = useMotionValue(-100);
   const mouseY = useMotionValue(-100);
@@ -136,6 +204,11 @@ export default function App() {
             return;
           }
 
+          if (isUserInExclusionZone()) {
+            console.log("[AUTO-SCROLL DEBUG] snap check skipped: user in exclusion zone");
+            return;
+          }
+
           const vh = window.innerHeight;
           const threshold = 0.18 * vh;
 
@@ -193,78 +266,6 @@ export default function App() {
     let lastY = -1;
     const isCreepActiveRef = { current: false };
 
-    const isUserInExclusionZone = () => {
-      let activeSectionId = "unknown";
-      const vh = window.innerHeight;
-      const allSections = document.querySelectorAll('section, [id]');
-      for (const el of Array.from(allSections)) {
-        if (el.id) {
-          const rect = el.getBoundingClientRect();
-          if (rect.top <= vh / 2 && rect.bottom >= vh / 2) {
-            activeSectionId = el.id;
-            break;
-          }
-        }
-      }
-
-      // 0. Check if user paused creep manually
-      if (isCreepPausedUserRef.current) {
-        console.log(`[AUTO-SCROLL DEBUG] paused: manual pause. scrollY: ${window.scrollY}, activeSection: ${activeSectionId}`);
-        return true;
-      }
-
-      // 1. Check if chat panel is open (only matches the dialog when active, not the persistent dock button)
-      const isChatOpen = !!document.querySelector('div[role="dialog"][aria-label="Chat with North"]');
-      if (isChatOpen) {
-        console.log(`[AUTO-SCROLL DEBUG] paused: chat panel open. scrollY: ${window.scrollY}, activeSection: ${activeSectionId}`);
-        return true;
-      }
-
-      // 2. Check if any input or interactive element is focused inside these sections
-      const active = document.activeElement;
-      if (
-        active &&
-        active.closest("#revenue-calculator, #platform-demo, #ai-marketing, #form, #close")
-      ) {
-        console.log(`[AUTO-SCROLL DEBUG] paused: interactive focus inside ${active.closest("#revenue-calculator, #platform-demo, #ai-marketing, #form, #close")?.id}. focused element:`, active, `scrollY: ${window.scrollY}, activeSection: ${activeSectionId}`);
-        return true;
-      }
-
-      // 4. Check if any gated video's section is active and the video has not ended
-      const gatedVideos = document.querySelectorAll('video[data-gates-scroll="true"]');
-      for (const video of Array.from(gatedVideos) as HTMLVideoElement[]) {
-        if (!video.ended) {
-          const sectionEl = video.closest('section');
-          if (sectionEl) {
-            const rect = sectionEl.getBoundingClientRect();
-            // Check if section is active (occupies center of viewport)
-            const isSectionActive = rect.top <= vh / 2 && rect.bottom >= vh / 2;
-            
-            // For the Hero section (id="open"), calculate scroll progress mathematically
-            // to allow the opening brand logo and text reveals to play before halting.
-            // Halt only when scroll progress reaches the video moment (>= 0.58).
-            if (sectionEl.id === "open") {
-              const maxScroll = rect.height - vh;
-              const progress = maxScroll > 0 ? -rect.top / maxScroll : 0;
-              if (isSectionActive && progress >= 0.58) {
-                const videoRect = video.getBoundingClientRect();
-                console.log(`[AUTO-SCROLL DEBUG] paused: Hero video active (progress: ${progress.toFixed(2)}). scrollY: ${window.scrollY}, activeSection: ${activeSectionId}, videoRect:`, { top: videoRect.top, left: videoRect.left, width: videoRect.width, height: videoRect.height });
-                return true;
-              }
-            } else {
-              // For other sections, block immediately when the section becomes active
-              if (isSectionActive) {
-                const videoRect = video.getBoundingClientRect();
-                console.log(`[AUTO-SCROLL DEBUG] paused: Gated video in section ${sectionEl.id} is active. scrollY: ${window.scrollY}, activeSection: ${activeSectionId}, videoRect:`, { top: videoRect.top, left: videoRect.left, width: videoRect.width, height: videoRect.height });
-                return true;
-              }
-            }
-          }
-        }
-      }
-
-      return false;
-    };
 
     const creepScroll = () => {
       if (!isCreepActiveRef.current) return;
