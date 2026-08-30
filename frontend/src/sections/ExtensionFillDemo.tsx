@@ -237,8 +237,9 @@ export function ExtensionFillDemo({ data, sharedMlsData }: ExtensionFillDemoProp
             </div>
             {/* Matrix Form Sub Bar */}
             <div className="bg-[#e9eff7] text-[#333333] px-5 py-2 text-xs font-bold border-b border-[#bdcddc] flex items-center justify-between">
-              <span>Input / Add New Listing / Residential</span>
-              <div className="text-[10px] text-lp-grey bg-white/70 border border-[#bdcddc] px-2 py-0.5 rounded">
+              <span className="hidden sm:inline">Input / Add New Listing / Residential</span>
+              <span className="sm:hidden text-[10px]">Residential Input</span>
+              <div className="text-[10px] text-lp-grey bg-white/70 border border-[#bdcddc] px-2 py-0.5 rounded shrink-0">
                 Server Status: ONLINE
               </div>
             </div>
@@ -373,10 +374,10 @@ export function ExtensionFillDemo({ data, sharedMlsData }: ExtensionFillDemoProp
 
               {/* Form Footer Action Buttons */}
               <div className="mt-12 pt-4 border-t border-[#d8e0e6] flex items-center justify-between select-none">
-                <span className="text-[10px] text-lp-grey font-medium uppercase font-sans">
+                <span className="hidden sm:inline text-[10px] text-lp-grey font-medium uppercase font-sans">
                   * Indicates required field. Form will block validation if incomplete.
                 </span>
-                <div className="flex gap-2.5 text-xs font-bold">
+                <div className="flex gap-2.5 text-xs font-bold w-full sm:w-auto justify-end">
                   <button type="button" disabled className="px-4 py-1.5 bg-[#f0f4f8] border border-[#b8c9d9] text-[#002f5e] rounded cursor-not-allowed">
                     Save as Draft
                   </button>

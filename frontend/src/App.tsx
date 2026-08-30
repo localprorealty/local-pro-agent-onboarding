@@ -542,7 +542,7 @@ export default function App() {
   }, []);
 
   return (
-    <div className="relative bg-lp-bg font-body">
+    <div className="relative bg-lp-bg font-body overflow-x-hidden">
       <BrandingBar scrollYProgress={scrollYProgress} />
       {/* Hide standard cursor only on non-touch devices where custom cursor is active */}
       {showCursor && hasMovedMouse && (
