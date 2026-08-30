@@ -53,7 +53,7 @@ export function FormSection({ data }: { data: SectionData }) {
   }
 
   return (
-    <SectionShell id={data.id}>
+    <SectionShell id={data.id} className="min-h-[60vh] pt-4 pb-24">
       <EditorialHeader align="center" eyebrow={data.eyebrow} title={data.title} body={"body" in data ? data.body : undefined} />
 
       <Reveal delay={0.2}>

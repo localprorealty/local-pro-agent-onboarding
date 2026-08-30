@@ -38,8 +38,9 @@ export function SectionRouter({ data, sharedMlsData, setSharedMlsData }: Section
     case "recognition":
       return <RecognitionSection data={data} />;
     case "built-for-next":
-    case "close":
       return <NarrativeSection data={data} align="left" />;
+    case "close":
+      return <NarrativeSection data={data} align="center" className="min-h-[40vh] pt-24 pb-4" />;
     case "form":
       return <FormSection data={data} />;
     default:

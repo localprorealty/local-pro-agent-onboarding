@@ -3,9 +3,9 @@ import { EditorialHeader } from "@/components/EditorialHeader";
 import type { SectionData } from "@/data/content";
 import { VideoBlock } from "@/components/VideoBlock";
 
-export function NarrativeSection({ data, align = "left" }: { data: SectionData; align?: "left" | "center" }) {
+export function NarrativeSection({ data, align = "left", className = "" }: { data: SectionData; align?: "left" | "center"; className?: string }) {
   return (
-    <SectionShell id={data.id}>
+    <SectionShell id={data.id} className={className}>
       <EditorialHeader
         align={align}
         eyebrow={data.eyebrow}
