@@ -22,37 +22,32 @@ export function HeroSection({ data }: { data: SectionData }) {
     offset: ["start start", "end end"],
   });
 
-  // 1. Logo Reveal (0 - 18%)
+  // 1. Logo Reveal (0 - 20%)
   const logoOpacity = useTransform(scrollYProgress, [0, 0.05, 0.12, 0.2], [0.02, 1, 1, 0]);
   const logoScale = useTransform(scrollYProgress, [0.12, 0.2], [1, 0.85]);
   const logoY = useTransform(scrollYProgress, [0.12, 0.2], [0, -30]);
 
-  // 3. Eyebrow + Title + Copy (Strictly sequential: 22% - 55%)
-  // Title: Settling in focus and scaling down slightly
-  const titleScale = useTransform(scrollYProgress, [0.22, 0.45], [1.08, 1]);
-  const titleBlur = useTransform(scrollYProgress, [0.22, 0.38], [8, 0]);
-  const titleOpacity = useTransform(scrollYProgress, [0.22, 0.32, 0.48, 0.55], [0, 1, 1, 0]);
-
+  // 2. Eyebrow + Title + Copy (Sequential: 22% - 52%)
   // Eyebrow
-  const eyebrowOpacity = useTransform(scrollYProgress, [0.22, 0.3, 0.48, 0.55], [0, 1, 1, 0]);
+  const eyebrowOpacity = useTransform(scrollYProgress, [0.22, 0.28, 0.46, 0.52], [0, 1, 1, 0]);
+
+  // Title: Settling in focus and scaling down slightly
+  const titleScale = useTransform(scrollYProgress, [0.26, 0.34], [1.05, 1]);
+  const titleBlur = useTransform(scrollYProgress, [0.26, 0.34], [6, 0]);
+  const titleOpacity = useTransform(scrollYProgress, [0.26, 0.34, 0.46, 0.52], [0, 1, 1, 0]);
 
   // Body
-  const bodyOpacity = useTransform(scrollYProgress, [0.3, 0.4, 0.48, 0.55], [0, 1, 1, 0]);
-  const bodyY = useTransform(scrollYProgress, [0.3, 0.4], [20, 0]);
+  const bodyOpacity = useTransform(scrollYProgress, [0.32, 0.40, 0.46, 0.52], [0, 1, 1, 0]);
+  const bodyY = useTransform(scrollYProgress, [0.32, 0.40], [15, 0]);
 
   // Sub Copy
-  const subOpacity = useTransform(scrollYProgress, [0.38, 0.46, 0.48, 0.55], [0, 1, 1, 0]);
-  const subY = useTransform(scrollYProgress, [0.38, 0.46], [20, 0]);
+  const subOpacity = useTransform(scrollYProgress, [0.38, 0.46, 0.46, 0.52], [0, 1, 1, 0]);
+  const subY = useTransform(scrollYProgress, [0.38, 0.46], [15, 0]);
 
-
-
-  // Text container translates up cleanly before video enters
-  const textY = useTransform(scrollYProgress, [0.35, 0.55], [0, -240]);
-
-  // Video transitions: starts invisible and translated down, then fades in and centers
-  const videoOpacity = useTransform(scrollYProgress, [0.55, 0.7, 0.85, 0.95], [0, 1, 1, 0]);
-  const videoY = useTransform(scrollYProgress, [0.55, 0.7], [180, 0]);
-  const videoScale = useTransform(scrollYProgress, [0.55, 0.7], [0.92, 1]);
+  // Video transitions: starts after text group is completely gone (starts at 55%)
+  const videoOpacity = useTransform(scrollYProgress, [0.55, 0.68, 0.85, 0.95], [0, 1, 1, 0]);
+  const videoY = useTransform(scrollYProgress, [0.55, 0.68], [30, 0]);
+  const videoScale = useTransform(scrollYProgress, [0.55, 0.68], [0.95, 1]);
 
   if (prefersReducedMotion) {
     return (
@@ -95,14 +90,9 @@ export function HeroSection({ data }: { data: SectionData }) {
           </p>
         </motion.div>
 
-
-
-        {/* Content Container */}
-        <div className="w-full max-w-3xl mx-auto flex flex-col items-center text-center gap-6 relative z-10">
-          <motion.div
-            style={{ y: textY }}
-            className="flex flex-col items-center text-center gap-6 w-full"
-          >
+        {/* Content Container (Stage 2: Narrative Text Group) */}
+        <div className="absolute max-w-3xl w-full px-6 flex flex-col items-center justify-center text-center z-10 pointer-events-none">
+          <div className="flex flex-col items-center text-center gap-6 w-full">
             {/* Eyebrow */}
             <motion.p
               style={{ opacity: eyebrowOpacity }}
@@ -142,10 +132,10 @@ export function HeroSection({ data }: { data: SectionData }) {
                 {data.sub}
               </motion.p>
             )}
-          </motion.div>
+          </div>
         </div>
 
-        {/* Video */}
+        {/* Video (Stage 3: Video Player) */}
         {"video" in data && data.video && (
           <motion.div
             style={{
@@ -153,7 +143,7 @@ export function HeroSection({ data }: { data: SectionData }) {
               y: videoY,
               scale: videoScale,
             }}
-            className="absolute max-w-4xl w-full px-6 z-20 hero-video-wrapper"
+            className="absolute max-w-4xl w-full px-6 z-20 flex items-center justify-center animate-fade-in"
           >
             {Array.isArray(data.video) ? (
               <VideoBlock src={data.video[0].src} gatesScroll={data.video[0].gatesScroll} />
