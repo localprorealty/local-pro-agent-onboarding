@@ -590,12 +590,22 @@ export default function App() {
   );
 }
 
+interface ChildInfo {
+  name: string;
+  pageTop: number;
+  pageLeft: number;
+  width: number;
+  height: number;
+}
+
 interface GapInfo {
   id: string;
   index: number;
-  offsetTop: number;
-  offsetHeight: number;
+  pageTop: number;
+  height: number;
+  width: number;
   gapToNext: number | null;
+  children: ChildInfo[];
 }
 
 function GapDebugOverlay() {
@@ -604,28 +614,93 @@ function GapDebugOverlay() {
   useEffect(() => {
     const updateGaps = () => {
       const newGaps: GapInfo[] = [];
+      const scrollY = window.scrollY;
+      const scrollX = window.scrollX;
+
       for (let i = 0; i < SECTIONS.length; i++) {
         const id = SECTIONS[i].id;
         const el = document.getElementById(id);
         if (el) {
-          const offsetTop = el.offsetTop;
-          const offsetHeight = el.offsetHeight;
+          const rect = el.getBoundingClientRect();
+          const pageTop = rect.top + scrollY;
+          const height = el.offsetHeight || rect.height;
+          const width = el.offsetWidth || rect.width;
           let gapToNext: number | null = null;
           
           if (i < SECTIONS.length - 1) {
             const nextId = SECTIONS[i + 1].id;
             const nextEl = document.getElementById(nextId);
             if (nextEl) {
-              gapToNext = nextEl.offsetTop - (offsetTop + offsetHeight);
+              const nextRect = nextEl.getBoundingClientRect();
+              const nextPageTop = nextRect.top + scrollY;
+              gapToNext = Math.round(nextPageTop - (pageTop + height));
             }
           }
+
+          // Scan visible layout children to identify nested divs
+          const children: ChildInfo[] = [];
+          const childElements: HTMLElement[] = [];
+          
+          Array.from(el.children).forEach((c) => {
+            childElements.push(c as HTMLElement);
+            Array.from(c.children).forEach((innerC) => {
+              childElements.push(innerC as HTMLElement);
+              Array.from(innerC.children).forEach((deepC) => {
+                childElements.push(deepC as HTMLElement);
+              });
+            });
+          });
+
+          childElements.forEach((childEl) => {
+            if (childEl.offsetHeight > 4 && childEl.offsetWidth > 4) {
+              const childRect = childEl.getBoundingClientRect();
+              const childPageTop = Math.round(childRect.top + scrollY);
+              const childPageLeft = Math.round(childRect.left + scrollX);
+              const cWidth = Math.round(childRect.width);
+              const cHeight = Math.round(childRect.height);
+
+              // Skip tracking full container dimensions as children
+              if (cWidth === width && cHeight === height) return;
+
+              let name = childEl.tagName.toLowerCase();
+              if (childEl.id) {
+                name = `#${childEl.id}`;
+              } else if (childEl.className) {
+                const classes = childEl.className.split(" ").filter(c => c && !c.includes("motion") && !c.includes("style") && !c.includes("transition"));
+                if (classes.length > 0) {
+                  name = classes[0];
+                }
+              }
+
+              // De-duplicate indicators
+              const exists = children.some(
+                (c) =>
+                  Math.abs(c.pageTop - childPageTop) < 2 &&
+                  Math.abs(c.pageLeft - childPageLeft) < 2 &&
+                  Math.abs(c.width - cWidth) < 2 &&
+                  Math.abs(c.height - cHeight) < 2
+              );
+
+              if (!exists) {
+                children.push({
+                  name,
+                  pageTop: childPageTop,
+                  pageLeft: childPageLeft,
+                  width: cWidth,
+                  height: cHeight,
+                });
+              }
+            }
+          });
 
           newGaps.push({
             id,
             index: i + 1,
-            offsetTop,
-            offsetHeight,
+            pageTop: Math.round(pageTop),
+            height: Math.round(height),
+            width: Math.round(width),
             gapToNext,
+            children,
           });
         }
       }
@@ -647,25 +722,46 @@ function GapDebugOverlay() {
   return (
     <div className="absolute inset-0 pointer-events-none z-[9999]">
       {gaps.map((g) => (
-        <div
-          key={g.id}
-          className="absolute left-6 font-mono font-bold text-xs"
-          style={{ top: `${g.offsetTop + 12}px` }}
-        >
+        <div key={g.id}>
           {/* Section Number Badge */}
-          <span className="bg-lp-gold text-lp-bg px-2.5 py-1 rounded shadow-lg border border-lp-border flex items-center gap-1.5 pointer-events-auto">
-            <span>Section {g.index}: <span className="underline">{g.id}</span></span>
-          </span>
+          <div
+            className="absolute left-6 font-mono font-bold text-xs pointer-events-auto"
+            style={{ top: `${g.pageTop + 12}px` }}
+          >
+            <span className="bg-lp-gold text-lp-bg px-2.5 py-1 rounded shadow-lg border border-lp-border flex items-center gap-1.5">
+              <span>Section {g.index}: <span className="underline">{g.id}</span> ({g.width}x{g.height}px)</span>
+            </span>
+          </div>
 
           {/* Gap Badge */}
           {g.gapToNext !== null && (
-            <span
-              className="absolute left-0 bg-red-600/95 text-white px-2 py-0.5 rounded shadow-lg border border-red-500 flex items-center pointer-events-auto"
-              style={{ top: `${g.offsetHeight}px`, transform: "translateY(-50%)" }}
+            <div
+              className="absolute left-6 font-mono font-bold text-xs pointer-events-auto"
+              style={{ top: `${g.pageTop + g.height}px`, transform: "translateY(-50%)" }}
             >
-              Gap to next: {g.gapToNext}px
-            </span>
+              <span className="bg-red-600/95 text-white px-2 py-0.5 rounded shadow-lg border border-red-500 flex items-center">
+                Gap to next: {g.gapToNext}px
+              </span>
+            </div>
           )}
+
+          {/* Inner children boxes */}
+          {g.children.map((child, cIdx) => (
+            <div
+              key={cIdx}
+              className="absolute border border-dashed border-cyan-500/40 bg-cyan-500/5 pointer-events-none"
+              style={{
+                top: `${child.pageTop}px`,
+                left: `${child.pageLeft}px`,
+                width: `${child.width}px`,
+                height: `${child.height}px`,
+              }}
+            >
+              <span className="absolute top-1 left-1 bg-cyan-950/90 text-cyan-300 font-mono text-[9px] px-1.5 py-0.5 rounded border border-cyan-500/30 whitespace-nowrap pointer-events-auto shadow-md">
+                {child.name} ({child.width}x{child.height}px)
+              </span>
+            </div>
+          ))}
         </div>
       ))}
     </div>
