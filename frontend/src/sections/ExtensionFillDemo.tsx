@@ -27,6 +27,7 @@ export function DiscoverCue({ label = "Hands-on demo below", prefersReducedMotio
 interface ExtensionFillDemoProps {
   data: SectionData;
   sharedMlsData: any | null;
+  isMobile?: boolean;
 }
 
 const SAMPLE_LISTING = {
@@ -40,7 +41,7 @@ const SAMPLE_LISTING = {
   "Estimated List Price": "$675,000",
 };
 
-export function ExtensionFillDemo({ data, sharedMlsData }: ExtensionFillDemoProps) {
+export function ExtensionFillDemo({ data, sharedMlsData, isMobile = false }: ExtensionFillDemoProps) {
   const [activeProperty, setActiveProperty] = useState<any | null>(null);
 
   // Autofill states for fields
@@ -226,19 +227,24 @@ export function ExtensionFillDemo({ data, sharedMlsData }: ExtensionFillDemoProp
                 <span className="font-display font-extrabold text-lg tracking-wider text-white">NTREIS</span>
                 <span className="text-xs font-semibold px-2 py-0.5 bg-[#f6b426] text-[#002f5e] rounded-sm font-sans uppercase">Matrix™</span>
               </div>
-              <div className="hidden md:flex gap-5 text-[11px] font-bold text-white/80 uppercase">
-                <span>MY MATRIX</span>
-                <span>SEARCH</span>
-                <span>STATS</span>
-                <span>TAX</span>
-                <span className="text-[#f6b426] border-b-2 border-[#f6b426] pb-0.5">INPUT</span>
-                <span>LINKS</span>
-              </div>
+              {!isMobile && (
+                <div className="flex gap-5 text-[11px] font-bold text-white/80 uppercase">
+                  <span>MY MATRIX</span>
+                  <span>SEARCH</span>
+                  <span>STATS</span>
+                  <span>TAX</span>
+                  <span className="text-[#f6b426] border-b-2 border-[#f6b426] pb-0.5">INPUT</span>
+                  <span>LINKS</span>
+                </div>
+              )}
             </div>
             {/* Matrix Form Sub Bar */}
             <div className="bg-[#e9eff7] text-[#333333] px-5 py-2 text-xs font-bold border-b border-[#bdcddc] flex items-center justify-between">
-              <span className="hidden sm:inline">Input / Add New Listing / Residential</span>
-              <span className="sm:hidden text-[10px]">Residential Input</span>
+              {isMobile ? (
+                <span className="text-[10px]">Residential Input</span>
+              ) : (
+                <span>Input / Add New Listing / Residential</span>
+              )}
               <div className="text-[10px] text-lp-grey bg-white/70 border border-[#bdcddc] px-2 py-0.5 rounded shrink-0">
                 Server Status: ONLINE
               </div>
@@ -249,16 +255,24 @@ export function ExtensionFillDemo({ data, sharedMlsData }: ExtensionFillDemoProp
           <div className="bg-[#fcfdfd] text-[#222222] p-5 flex flex-col flex-grow relative overflow-y-auto font-sans">
             
             {/* Matrix Tab Strip */}
-            <div className="flex border-b border-[#c8d4df] text-xs font-semibold mb-6 select-none shrink-0 overflow-x-auto whitespace-nowrap scrollbar-none">
-              <div className="px-4 py-2 border-l border-t border-r border-[#c8d4df] bg-white text-[#002f5e] -mb-[1px] relative z-10 rounded-t-sm border-t-2 border-t-[#002f5e] shrink-0">
-                Property Info
+            {isMobile ? (
+              <div className="flex border-b border-[#c8d4df] text-xs font-semibold mb-6 select-none shrink-0">
+                <div className="px-4 py-2 border-l border-t border-r border-[#c8d4df] bg-white text-[#002f5e] -mb-[1px] relative z-10 rounded-t-sm border-t-2 border-t-[#002f5e]">
+                  Property Info
+                </div>
               </div>
-              <div className="px-4 py-2 text-lp-grey/80 cursor-not-allowed shrink-0">Location</div>
-              <div className="px-4 py-2 text-lp-grey/80 cursor-not-allowed shrink-0">Land & Exterior</div>
-              <div className="px-4 py-2 text-lp-grey/80 cursor-not-allowed shrink-0">Rooms</div>
-              <div className="px-4 py-2 text-lp-grey/80 cursor-not-allowed shrink-0">Financial & Schools</div>
-              <div className="px-4 py-2 text-lp-grey/80 cursor-not-allowed shrink-0">Remarks</div>
-            </div>
+            ) : (
+              <div className="flex border-b border-[#c8d4df] text-xs font-semibold mb-6 select-none shrink-0">
+                <div className="px-4 py-2 border-l border-t border-r border-[#c8d4df] bg-white text-[#002f5e] -mb-[1px] relative z-10 rounded-t-sm border-t-2 border-t-[#002f5e]">
+                  Property Info
+                </div>
+                <div className="px-4 py-2 text-lp-grey/80 cursor-not-allowed">Location</div>
+                <div className="px-4 py-2 text-lp-grey/80 cursor-not-allowed">Land & Exterior</div>
+                <div className="px-4 py-2 text-lp-grey/80 cursor-not-allowed">Rooms</div>
+                <div className="px-4 py-2 text-lp-grey/80 cursor-not-allowed">Financial & Schools</div>
+                <div className="px-4 py-2 text-lp-grey/80 cursor-not-allowed">Remarks</div>
+              </div>
+            )}
 
             {/* Matrix Simulated Form */}
             <div className="flex-grow flex flex-col justify-between">
@@ -374,10 +388,12 @@ export function ExtensionFillDemo({ data, sharedMlsData }: ExtensionFillDemoProp
 
               {/* Form Footer Action Buttons */}
               <div className="mt-12 pt-4 border-t border-[#d8e0e6] flex items-center justify-between select-none">
-                <span className="hidden sm:inline text-[10px] text-lp-grey font-medium uppercase font-sans">
-                  * Indicates required field. Form will block validation if incomplete.
-                </span>
-                <div className="flex gap-2.5 text-xs font-bold w-full sm:w-auto justify-end">
+                {!isMobile && (
+                  <span className="text-[10px] text-lp-grey font-medium uppercase font-sans">
+                    * Indicates required field. Form will block validation if incomplete.
+                  </span>
+                )}
+                <div className={`flex gap-2.5 text-xs font-bold ${isMobile ? "w-full justify-between" : "w-auto justify-end"}`}>
                   <button type="button" disabled className="px-4 py-1.5 bg-[#f0f4f8] border border-[#b8c9d9] text-[#002f5e] rounded cursor-not-allowed">
                     Save as Draft
                   </button>

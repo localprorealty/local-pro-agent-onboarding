@@ -16,9 +16,10 @@ interface SectionRouterProps {
   sharedMlsData: any | null;
   setSharedMlsData: (data: any | null) => void;
   sharedByName?: string | null;
+  isMobile?: boolean;
 }
 
-export function SectionRouter({ data, sharedMlsData, setSharedMlsData, sharedByName = null }: SectionRouterProps) {
+export function SectionRouter({ data, sharedMlsData, setSharedMlsData, sharedByName = null, isMobile = false }: SectionRouterProps) {
   switch (data.id) {
     case "open":
       return <HeroSection data={data} />;
@@ -29,7 +30,7 @@ export function SectionRouter({ data, sharedMlsData, setSharedMlsData, sharedByN
     case "ai-marketing":
       return <AIMarketingDemo data={data} sharedMlsData={sharedMlsData} />;
     case "extension-demo":
-      return <ExtensionFillDemo data={data} sharedMlsData={sharedMlsData} />;
+      return <ExtensionFillDemo data={data} sharedMlsData={sharedMlsData} isMobile={isMobile} />;
     case "revenue-calculator":
       return <RevenueCalculator data={data} />;
     case "google-capture":

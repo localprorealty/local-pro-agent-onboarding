@@ -66,7 +66,7 @@ export function FormSection({ data, sharedByName = null }: { data: SectionData; 
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Full name"
-              className="bg-lp-card border border-lp-border rounded-lg px-4 py-2.5 text-sm text-lp-smoke focus:border-lp-gold outline-none"
+              className="bg-lp-card border border-lp-border rounded-lg px-4 py-2.5 text-base md:text-sm text-lp-smoke focus:border-lp-gold outline-none"
             />
             <input
               required
@@ -74,7 +74,7 @@ export function FormSection({ data, sharedByName = null }: { data: SectionData; 
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Email"
-              className="bg-lp-card border border-lp-border rounded-lg px-4 py-2.5 text-sm text-lp-smoke focus:border-lp-gold outline-none"
+              className="bg-lp-card border border-lp-border rounded-lg px-4 py-2.5 text-base md:text-sm text-lp-smoke focus:border-lp-gold outline-none"
             />
             <input
               required
@@ -82,7 +82,7 @@ export function FormSection({ data, sharedByName = null }: { data: SectionData; 
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               placeholder="Phone"
-              className="bg-lp-card border border-lp-border rounded-lg px-4 py-2.5 text-sm text-lp-smoke focus:border-lp-gold outline-none"
+              className="bg-lp-card border border-lp-border rounded-lg px-4 py-2.5 text-base md:text-sm text-lp-smoke focus:border-lp-gold outline-none"
             />
             <button
               type="submit"

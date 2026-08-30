@@ -12,7 +12,13 @@ import { BrandingBar } from "@/components/BrandingBar";
 export default function App() {
   useLenis();
   const [sharedMlsData, setSharedMlsData] = useState<any | null>(null);
-  const [showCursor, setShowCursor] = useState(false);
+  const [isMobile, setIsMobile] = useState(() => typeof window !== "undefined" ? window.innerWidth < 768 : false);
+  const [showCursor, setShowCursor] = useState(() => {
+    if (typeof window === "undefined") return false;
+    const hasTouch = "ontouchstart" in window || navigator.maxTouchPoints > 0;
+    const isSmall = window.innerWidth < 768;
+    return !hasTouch && !isSmall;
+  });
   const [hasMovedMouse, setHasMovedMouse] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const [hideScrollCue, setHideScrollCue] = useState(false);
@@ -185,6 +191,7 @@ export default function App() {
       const hasTouch = "ontouchstart" in window || navigator.maxTouchPoints > 0;
       const isSmall = window.innerWidth < 768;
       setShowCursor(!hasTouch && !isSmall);
+      setIsMobile(isSmall);
     };
 
     checkDevice();
@@ -542,7 +549,7 @@ export default function App() {
   }, []);
 
   return (
-    <div className="relative bg-lp-bg font-body overflow-x-hidden">
+    <div className="relative bg-lp-bg font-body">
       <BrandingBar scrollYProgress={scrollYProgress} />
       {/* Hide standard cursor only on non-touch devices where custom cursor is active */}
       {showCursor && hasMovedMouse && (
@@ -633,6 +640,7 @@ export default function App() {
                     sharedMlsData={sharedMlsData}
                     setSharedMlsData={setSharedMlsData}
                     sharedByName={sharedByName}
+                    isMobile={isMobile}
                   />
                 </Fragment>
               );
@@ -644,6 +652,7 @@ export default function App() {
                 sharedMlsData={sharedMlsData}
                 setSharedMlsData={setSharedMlsData}
                 sharedByName={sharedByName}
+                isMobile={isMobile}
               />
             );
           })}
