@@ -188,9 +188,9 @@ export function ExtensionFillDemo({ data, sharedMlsData }: ExtensionFillDemoProp
             </div>
             
             {/* Mock address bar */}
-            <div className="flex-grow max-w-lg mx-auto bg-lp-bg border border-lp-border/60 rounded-md py-1 px-3 text-xs text-lp-grey font-mono select-all flex items-center justify-between">
-              <span>https://ntrdd.mlsmatrix.com/Matrix/Input/InputForm.aspx?type=residential</span>
-              <svg className="w-3.5 h-3.5 text-lp-grey opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="flex-grow max-w-lg mx-auto bg-lp-bg border border-lp-border/60 rounded-md py-1 px-3 text-xs text-lp-grey font-mono select-all flex items-center justify-between min-w-0">
+              <span className="truncate mr-2">https://ntrdd.mlsmatrix.com/Matrix/Input/InputForm.aspx?type=residential</span>
+              <svg className="w-3.5 h-3.5 text-lp-grey opacity-60 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
             </div>
