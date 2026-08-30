@@ -15,9 +15,10 @@ interface SectionRouterProps {
   data: SectionData;
   sharedMlsData: any | null;
   setSharedMlsData: (data: any | null) => void;
+  sharedByName?: string | null;
 }
 
-export function SectionRouter({ data, sharedMlsData, setSharedMlsData }: SectionRouterProps) {
+export function SectionRouter({ data, sharedMlsData, setSharedMlsData, sharedByName = null }: SectionRouterProps) {
   switch (data.id) {
     case "open":
       return <HeroSection data={data} />;
@@ -42,7 +43,7 @@ export function SectionRouter({ data, sharedMlsData, setSharedMlsData }: Section
     case "close":
       return <NarrativeSection data={data} align="center" className="min-h-[40vh] pt-24 pb-4" />;
     case "form":
-      return <FormSection data={data} />;
+      return <FormSection data={data} sharedByName={sharedByName} />;
     default:
       return <NarrativeSection data={data} />;
   }

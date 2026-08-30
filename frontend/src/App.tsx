@@ -632,6 +632,7 @@ export default function App() {
                     data={section}
                     sharedMlsData={sharedMlsData}
                     setSharedMlsData={setSharedMlsData}
+                    sharedByName={sharedByName}
                   />
                 </Fragment>
               );
@@ -642,6 +643,7 @@ export default function App() {
                 data={section}
                 sharedMlsData={sharedMlsData}
                 setSharedMlsData={setSharedMlsData}
+                sharedByName={sharedByName}
               />
             );
           })}
