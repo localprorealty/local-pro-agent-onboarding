@@ -79,19 +79,18 @@ export function HeroSection({ data }: { data: SectionData }) {
 
   return (
     <section id={data.id} ref={containerRef} className="relative h-[400vh] w-full">
-      <div data-debug-name="Hero-Sticky-Wrapper" className="sticky top-0 h-screen w-full flex flex-col justify-center items-center overflow-hidden px-6 md:px-16 py-8">
+      <div className="sticky top-0 h-screen w-full flex flex-col justify-center items-center overflow-hidden px-6 md:px-16 py-8">
 
         {/* Brand-Reveal Opening Beat */}
         <motion.div
-          data-debug-name="Opening-Logo-Reveal"
           style={{ opacity: logoOpacity, scale: logoScale, y: logoY }}
           className="absolute inset-0 flex flex-col justify-center items-center pointer-events-none select-none z-20"
         >
-          <h1 data-debug-name="Opening-Logo-Text" className="font-display font-extrabold text-6xl md:text-8xl tracking-tighter leading-none select-none">
+          <h1 className="font-display font-extrabold text-6xl md:text-8xl tracking-tighter leading-none select-none">
             <span className="text-lp-smoke">Local</span>
             <span className="text-lp-gold">PRO</span>
           </h1>
-          <p data-debug-name="Opening-Sub-Text" className="text-[11px] md:text-xs tracking-[0.4em] font-semibold text-lp-gold uppercase mt-3">
+          <p className="text-[11px] md:text-xs tracking-[0.4em] font-semibold text-lp-gold uppercase mt-3">
             REALTY
           </p>
         </motion.div>
@@ -99,15 +98,13 @@ export function HeroSection({ data }: { data: SectionData }) {
 
 
         {/* Content Container */}
-        <div data-debug-name="Hero-Content-Container" className="w-full max-w-3xl mx-auto flex flex-col items-center text-center gap-6 relative z-10">
+        <div className="w-full max-w-3xl mx-auto flex flex-col items-center text-center gap-6 relative z-10">
           <motion.div
-            data-debug-name="Hero-Text-Group"
             style={{ y: textY }}
             className="flex flex-col items-center text-center gap-6 w-full"
           >
             {/* Eyebrow */}
             <motion.p
-              data-debug-name="Hero-Eyebrow"
               style={{ opacity: eyebrowOpacity }}
               className="text-xs uppercase tracking-[0.2em] text-lp-gold font-body"
             >
@@ -116,7 +113,6 @@ export function HeroSection({ data }: { data: SectionData }) {
 
             {/* Title (Headline) */}
             <motion.h2
-              data-debug-name="Hero-Headline"
               style={{
                 scale: titleScale,
                 opacity: titleOpacity,
@@ -130,7 +126,6 @@ export function HeroSection({ data }: { data: SectionData }) {
             {/* Body */}
             {"body" in data && (
               <motion.p
-                data-debug-name="Hero-Body"
                 style={{ opacity: bodyOpacity, y: bodyY }}
                 className="text-base md:text-lg text-lp-grey max-w-xl"
               >
@@ -141,7 +136,6 @@ export function HeroSection({ data }: { data: SectionData }) {
             {/* Sub Copy */}
             {"sub" in data && (
               <motion.p
-                data-debug-name="Hero-Sub-Copy"
                 style={{ opacity: subOpacity, y: subY }}
                 className="text-sm text-lp-grey/80 max-w-xl"
               >
@@ -154,7 +148,6 @@ export function HeroSection({ data }: { data: SectionData }) {
         {/* Video */}
         {"video" in data && data.video && (
           <motion.div
-            data-debug-name="Hero-Video-Wrapper"
             style={{
               opacity: videoOpacity,
               y: videoY,
