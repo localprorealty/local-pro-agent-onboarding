@@ -7,7 +7,7 @@ import type { SectionData } from "@/data/content";
 
 export function FormSection({ data }: { data: SectionData }) {
   const { user } = useGoogleAuth();
-  const [name, setName] = useState("");
+  const [name, setName] = useState(() => (window as any).userName || "");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [submitted, setSubmitted] = useState(false);
@@ -92,6 +92,13 @@ export function FormSection({ data }: { data: SectionData }) {
               {submitting ? "Sending…" : "Submit"}
             </button>
             {error && <p className="text-red-400 text-xs text-center">{error}</p>}
+
+            <p className="mt-4 text-[11px] text-lp-grey/80 text-center font-medium leading-relaxed font-body">
+              {(window as any).sharedByName
+                ? `Prefer to talk to ${(window as any).sharedByName} directly? Call anytime: (972) 400-0017`
+                : "Prefer to just talk? Call Deana anytime: (972) 400-0017"
+              }
+            </p>
           </form>
         )}
       </Reveal>

@@ -82,12 +82,18 @@ function parseMarkdown(text: string) {
 }
 
 export function ChatPanel({ open, onClose }: ChatPanelProps) {
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      role: "assistant",
-      content: "Hey, I'm North. Ask me anything about LocalPRO — culture, revenue share, the platform, whatever.",
-    },
-  ]);
+  const [messages, setMessages] = useState<ChatMessage[]>(() => {
+    const userName = (window as any).userName;
+    const greeting = userName
+      ? `Hey ${userName} — glad you're here. Ask me anything about LocalPRO.`
+      : "Hey, I'm North. Ask me anything about LocalPRO — culture, revenue share, the platform, whatever.";
+    return [
+      {
+        role: "assistant",
+        content: greeting,
+      },
+    ];
+  });
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

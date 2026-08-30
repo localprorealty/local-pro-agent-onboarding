@@ -1,8 +1,9 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Fragment } from "react";
 import { useMotionValue, useSpring, motion, useScroll, AnimatePresence } from "framer-motion";
 import { useLenis } from "@/lib/useLenis";
 import { SECTIONS, type SectionData } from "@/data/content";
 import { SectionRouter } from "@/sections/SectionRouter";
+import { PersonalizedWelcome } from "@/sections/PersonalizedWelcome";
 import { NorthDock } from "@/components/NorthDock/NorthDock";
 import { ScrollProgress } from "@/components/ScrollProgress";
 import { GoogleAuthProvider } from "@/context/GoogleAuthContext";
@@ -47,6 +48,57 @@ export default function App() {
   }, [prefersReducedMotion]);
 
   const { scrollYProgress } = useScroll();
+
+  const [userName, setUserName] = useState<string | null>(null);
+  const [sharedByName, setSharedByName] = useState<string | null>(null);
+
+  useEffect(() => {
+    const formatName = (str: string): string | null => {
+      try {
+        const decoded = decodeURIComponent(str.trim());
+        // Basic validation: must be reasonably short (<= 50 chars),
+        // and contain only alphanumeric, space, hyphens, or periods.
+        if (decoded.length > 50) return null;
+        if (!/^[a-zA-Z0-9\s\-.]+$/.test(decoded)) return null;
+
+        // Replace hyphens/underscores with spaces
+        const withSpaces = decoded.replace(/[-_]+/g, " ");
+
+        // Title case each word
+        const words = withSpaces.split(/\s+/).filter(Boolean);
+        const titleCased = words
+          .map((w) => w.charAt(0).toUpperCase() + w.substring(1).toLowerCase())
+          .join(" ");
+
+        return titleCased || null;
+      } catch (e) {
+        return null;
+      }
+    };
+
+    // 1. Parse name from path
+    const path = window.location.pathname;
+    if (path && path !== "/") {
+      const rawPathName = path.startsWith("/") ? path.substring(1) : path;
+      const parsedUserName = formatName(rawPathName);
+      if (parsedUserName) {
+        setUserName(parsedUserName);
+        (window as any).userName = parsedUserName;
+        document.title = `Welcome, ${parsedUserName} | LocalPRO Realty`;
+      }
+    }
+
+    // 2. Parse from from query params
+    const searchParams = new URLSearchParams(window.location.search);
+    const rawFrom = searchParams.get("from");
+    if (rawFrom) {
+      const parsedSharedByName = formatName(rawFrom);
+      if (parsedSharedByName) {
+        setSharedByName(parsedSharedByName);
+        (window as any).sharedByName = parsedSharedByName;
+      }
+    }
+  }, []);
 
   const isUserInExclusionZone = () => {
     let activeSectionId = "unknown";
@@ -542,7 +594,7 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      <ScrollProgress sectionCount={SECTIONS.length} />
+      <ScrollProgress sectionCount={SECTIONS.length + (userName ? 1 : 0)} />
       <NorthDock />
 
       {/* Auto-scroll Play/Pause Toggle Button */}
@@ -569,14 +621,28 @@ export default function App() {
 
        <GoogleAuthProvider>
         <main>
-          {SECTIONS.map((section) => (
-            <SectionRouter
-              key={section.id}
-              data={section}
-              sharedMlsData={sharedMlsData}
-              setSharedMlsData={setSharedMlsData}
-            />
-          ))}
+          {SECTIONS.map((section) => {
+            if (section.id === "form") {
+              return (
+                <Fragment key={section.id}>
+                  <PersonalizedWelcome name={userName} sharedByName={sharedByName} />
+                  <SectionRouter
+                    data={section}
+                    sharedMlsData={sharedMlsData}
+                    setSharedMlsData={setSharedMlsData}
+                  />
+                </Fragment>
+              );
+            }
+            return (
+              <SectionRouter
+                key={section.id}
+                data={section}
+                sharedMlsData={sharedMlsData}
+                setSharedMlsData={setSharedMlsData}
+              />
+            );
+          })}
         </main>
       </GoogleAuthProvider>
 
