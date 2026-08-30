@@ -249,7 +249,7 @@ export function RevenueCalculator({ data }: { data: SectionData }) {
           </div>
 
           {/* Results Section */}
-          <div className="lg:col-span-5 flex flex-col p-6 md:p-8 rounded-2xl bg-lp-card border border-lp-border shadow-2xl relative overflow-hidden">
+          <div className="lg:col-span-5 flex flex-col p-6 md:p-8 rounded-2xl bg-lp-card border border-lp-border shadow-2xl relative">
             {/* Ambient Background Glow behind total */}
             <div className="absolute -top-16 -right-16 w-40 h-40 rounded-full bg-lp-gold/5 blur-3xl pointer-events-none" />
             

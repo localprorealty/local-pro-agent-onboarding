@@ -33,15 +33,6 @@ export function NorthDock() {
     }
   }
 
-  const getNorthImage = () => {
-    if (traitIndex === null) return "/2.png";
-    if (traitIndex >= 0 && traitIndex <= 2) return "/2.png"; // Chapter 1: beats 1-3
-    if (traitIndex >= 3 && traitIndex <= 6) return "/2.png"; // Chapter 2: beats 4-7
-    return "/2.png"; // Chapter 3: beats 8-10
-  };
-
-  const activeImage = getNorthImage();
-
   return (
     <>
       <ChatPanel open={chatOpen} onClose={() => setChatOpen(false)} />
@@ -62,16 +53,12 @@ export function NorthDock() {
               className="cursor-pointer rounded-full relative overflow-hidden w-16 h-16 border border-lp-border bg-lp-card flex items-center justify-center shadow-lg"
               aria-label="Chat with North"
             >
-              <div className="absolute inset-0 flex items-center justify-center p-0.5">
-                <img
-                  src="/LPR-icon.png"
-                  alt="Chat with North"
-                  className="w-full h-full object-cover rounded-full"
-                  onError={(e) => {
-                    // Fallback to activeImage (/2.png) if LPR-icon.png hasn't been uploaded by user yet
-                    (e.target as HTMLImageElement).src = activeImage;
-                  }}
-                />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-full h-full rounded-full bg-gradient-to-br from-[#1c1a17] to-[#121214] border border-lp-border flex items-center justify-center text-lp-gold shadow-inner hover:border-lp-gold/60 transition-all duration-300">
+                  <span className="font-display font-black text-2xl tracking-wider text-transparent bg-clip-text bg-gradient-to-b from-[#f3e7c4] to-[#cfb87c] drop-shadow-[0_0_8px_rgba(207,184,124,0.4)] select-none">
+                    N
+                  </span>
+                </div>
               </div>
 
               {reacting && (
