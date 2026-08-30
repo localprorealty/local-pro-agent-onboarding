@@ -662,13 +662,18 @@ function GapDebugOverlay() {
               // Skip tracking full container dimensions as children
               if (cWidth === width && cHeight === height) return;
 
-              let name = childEl.tagName.toLowerCase();
-              if (childEl.id) {
-                name = `#${childEl.id}`;
-              } else if (childEl.className) {
-                const classes = childEl.className.split(" ").filter(c => c && !c.includes("motion") && !c.includes("style") && !c.includes("transition"));
-                if (classes.length > 0) {
-                  name = classes[0];
+              let name = childEl.getAttribute("data-debug-name") || "";
+              if (!name) {
+                if (childEl.id) {
+                  name = `#${childEl.id}`;
+                } else {
+                  name = childEl.tagName.toLowerCase();
+                  if (childEl.className) {
+                    const classes = childEl.className.split(" ").filter(c => c && !c.includes("motion") && !c.includes("style") && !c.includes("transition"));
+                    if (classes.length > 0) {
+                      name = classes[0];
+                    }
+                  }
                 }
               }
 
