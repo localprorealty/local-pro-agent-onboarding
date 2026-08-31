@@ -8,7 +8,6 @@ interface VideoBlockProps {
 export function VideoBlock({ src, gatesScroll = false }: VideoBlockProps) {
   const [hasError, setHasError] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [showNudge, setShowNudge] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -27,24 +26,15 @@ export function VideoBlock({ src, gatesScroll = false }: VideoBlockProps) {
     verifyVideo();
   }, [src]);
 
-  // One-time nudge checks on mount
+  // Check prefers-reduced-motion on mount and on change
   useEffect(() => {
     const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
     setPrefersReducedMotion(mediaQuery.matches);
     const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
     mediaQuery.addEventListener("change", handler);
 
-    const checkNudge = () => {
-      const watched = localStorage.getItem("hasWatchedAnyLPVideo");
-      setShowNudge(!watched);
-    };
-
-    checkNudge();
-    window.addEventListener("lp-video-played", checkNudge);
-
     return () => {
       mediaQuery.removeEventListener("change", handler);
-      window.removeEventListener("lp-video-played", checkNudge);
     };
   }, []);
 
@@ -55,11 +45,7 @@ export function VideoBlock({ src, gatesScroll = false }: VideoBlockProps) {
   const handlePlayClick = () => {
     if (videoRef.current) {
       videoRef.current.play()
-        .then(() => {
-          setIsPlaying(true);
-          localStorage.setItem("hasWatchedAnyLPVideo", "true");
-          window.dispatchEvent(new CustomEvent("lp-video-played"));
-        })
+        .then(() => setIsPlaying(true))
         .catch(() => setHasError(true));
     }
   };
@@ -84,11 +70,7 @@ export function VideoBlock({ src, gatesScroll = false }: VideoBlockProps) {
         preload="metadata"
         playsInline
         data-gates-scroll={gatesScroll ? "true" : "false"}
-        onPlay={() => {
-          setIsPlaying(true);
-          localStorage.setItem("hasWatchedAnyLPVideo", "true");
-          window.dispatchEvent(new CustomEvent("lp-video-played"));
-        }}
+        onPlay={() => setIsPlaying(true)}
         onPause={() => setIsPlaying(false)}
         onEnded={() => setIsPlaying(false)}
         onError={() => setHasError(true)}
@@ -102,7 +84,7 @@ export function VideoBlock({ src, gatesScroll = false }: VideoBlockProps) {
       >
         <div className="relative flex items-center justify-center">
           {/* Radial arrows container */}
-          {showNudge && !prefersReducedMotion && (
+          {!prefersReducedMotion && (
             <div className="absolute w-32 h-32 flex items-center justify-center">
               {[0, 90, 180, 270].map((deg) => (
                 <svg
@@ -132,11 +114,9 @@ export function VideoBlock({ src, gatesScroll = false }: VideoBlockProps) {
           </div>
 
           {/* Label */}
-          {showNudge && (
-            <div className="absolute top-12 whitespace-nowrap bg-lp-bg-raised/95 border border-lp-border text-lp-gold px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider shadow-lg">
-              Press play
-            </div>
-          )}
+          <div className="absolute top-12 whitespace-nowrap bg-lp-bg-raised/95 border border-lp-border text-lp-gold px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider shadow-lg">
+            Press play
+          </div>
         </div>
       </div>
     </div>

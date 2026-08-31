@@ -26,8 +26,8 @@ export default function App() {
   const lenisRef = useRef<any>(null);
   const prefersReducedMotionRef = useRef(false);
 
-  const [isCreepPausedUser, setIsCreepPausedUser] = useState(false);
-  const isCreepPausedUserRef = useRef(false);
+  const [isCreepPausedUser, setIsCreepPausedUser] = useState(true);
+  const isCreepPausedUserRef = useRef(true);
 
 
   useEffect(() => {
@@ -37,6 +37,7 @@ export default function App() {
   const handleToggleAutoScroll = () => {
     setIsCreepPausedUser((prev) => {
       const next = !prev;
+      isCreepPausedUserRef.current = next;
       if (next) {
         window.dispatchEvent(new CustomEvent("pause-creep"));
       } else {
@@ -332,7 +333,7 @@ export default function App() {
     const creepScroll = () => {
       if (!isCreepActiveRef.current) return;
 
-      const lenis = lenisRef.current;
+      const lenis = lenisRef.current || (window as any).lenisInstance;
       const prefersReduced = prefersReducedMotionRef.current;
       const isExcl = isUserInExclusionZone();
 
@@ -505,6 +506,7 @@ export default function App() {
 
     const handleResumeCreep = () => {
       console.log("[AUTO-SCROLL] Manual resume requested. Starting creep.");
+      isCreepPausedUserRef.current = false;
       if (idleTimeout) {
         clearTimeout(idleTimeout);
       }
@@ -513,6 +515,7 @@ export default function App() {
 
     const handlePauseCreep = () => {
       console.log("[AUTO-SCROLL] Manual pause requested. Stopping creep.");
+      isCreepPausedUserRef.current = true;
       stopCreep();
       if (idleTimeout) {
         clearTimeout(idleTimeout);
