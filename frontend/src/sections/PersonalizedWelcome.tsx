@@ -13,7 +13,7 @@ export function PersonalizedWelcome({ name, sharedByName }: PersonalizedWelcomeP
 
   const bodyCopy = isDeana
     ? "I wanted you to see this yourself, not just get another cold recruiting message. Take your time looking through this. There's no pressure and no obligation. If something here resonates, the form near the bottom is the easiest way to reach me."
-    : `${sharedByName} thought you might be a good fit for what we're building at LocalPRO, and asked me to send this along directly instead of through a generic recruiting message. Take your time looking through this. There's no pressure and no obligation. If something here resonates, the form near the bottom is the easiest way to reach me.`;
+    : `I thought you might be a good fit for LocalPRO, and wanted to send this along directly instead of through a generic recruiting message. Take your time looking through this. There's no pressure and no obligation. If something here resonates, the form near the bottom is the easiest way to reach me.`;
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-8 w-full select-none" id="personalized-welcome">
@@ -23,7 +23,7 @@ export function PersonalizedWelcome({ name, sharedByName }: PersonalizedWelcomeP
             A note from {senderName}
           </p>
           <h2 className="font-display font-bold text-2xl md:text-3xl leading-tight text-lp-smoke">
-            {name}, glad you found your way here.
+            {name} & team, <br /> glad you found your way here.
           </h2>
           <p className="text-sm md:text-base text-lp-grey leading-relaxed max-w-2xl font-body">
             {bodyCopy}
