@@ -5,13 +5,13 @@ export interface Trait {
 // narrative sequence for North the guide
 export const TRAITS: Trait[] = [
   { text: "Hey, I'm North." },
-  { text: "I'm the guide here at LocalPRO Realty — you'll see me around." },
-  { text: "Here's a secret: we're all a little bit wolf around here." },
-  { text: "Wolves don't win by being the strongest. They win by watching out for each other." },
-  { text: "I notice things before they become problems — so you don't have to catch everything alone." },
-  { text: "I remember the relationships that matter, long after the deal closes." },
-  { text: "When one of us needs backup, the whole pack shows up." },
-  { text: "That's not just how wolves work. That's how LocalPRO works." },
-  { text: "You bring the ambition. We bring the pack." },
-  { text: "Welcome in. Let's build something together." },
+  { text: "I'm your AI guide and teammate here at LocalPRO Realty — you'll see me around." },
+  { text: "LocalPRO was founded with a singular mission: to multiply what productive agents do best." },
+  { text: "We don't just hand you logins and wish you luck. We align coaching, media production, and custom AI tools around your business." },
+  { text: "Voted a Top Brokerage in DFW for 2024 & 2025, our culture is built on our H.E.A.R.T. values — having each other's backs every day." },
+  { text: "From our proprietary MLS Autofill extension to our in-house podcast studio, we handle the busywork so you can focus on clients." },
+  { text: "You keep your hard-earned commission with transparent splits, plus long-term wealth through our revenue share program." },
+  { text: "When you build at LocalPRO, you never have to grow your business alone." },
+  { text: "You bring the ambition. We supply the platform, leverage, and community." },
+  { text: "Welcome in. Let's build something extraordinary together." },
 ];

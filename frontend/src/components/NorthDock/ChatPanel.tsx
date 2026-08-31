@@ -161,7 +161,7 @@ export function ChatPanel({ open, onClose }: ChatPanelProps) {
               >
                 {m.role === "assistant" && (
                   <img
-                    src="/2.png"
+                    src="/LPR-icon.png"
                     alt="North Avatar"
                     className="w-6 h-6 rounded-full object-cover border border-lp-border shrink-0 mt-0.5"
                   />
@@ -182,7 +182,7 @@ export function ChatPanel({ open, onClose }: ChatPanelProps) {
             {loading && (
               <div className="flex items-start gap-2 justify-start">
                 <img
-                  src="/2.png"
+                  src="/LPR-icon.png"
                   alt="North Avatar"
                   className="w-6 h-6 rounded-full object-cover border border-lp-border shrink-0 mt-0.5"
                 />
