@@ -8,6 +8,7 @@ import { NorthDock } from "@/components/NorthDock/NorthDock";
 import { ScrollProgress } from "@/components/ScrollProgress";
 import { GoogleAuthProvider } from "@/context/GoogleAuthContext";
 import { BrandingBar } from "@/components/BrandingBar";
+import { BackgroundAudio } from "@/components/BackgroundAudio";
 
 export default function App() {
   useLenis();
@@ -609,27 +610,32 @@ export default function App() {
       <ScrollProgress sectionCount={SECTIONS.length + (userName ? 1 : 0)} />
       <NorthDock />
 
-      {/* Auto-scroll Play/Pause Toggle Button */}
-      <button
-        onClick={handleToggleAutoScroll}
-        className="fixed top-6 right-6 z-[9990] w-12 h-12 rounded-full border border-lp-border bg-lp-bg/60 backdrop-blur-md text-lp-smoke flex items-center justify-center cursor-pointer transition-all duration-300 hover:border-lp-gold/60 hover:text-lp-gold hover:drop-shadow-[0_0_12px_rgba(207,184,124,0.4)] group"
-        aria-label={isCreepPausedUser ? "Play Auto-scroll" : "Pause Auto-scroll"}
-      >
-        {isCreepPausedUser ? (
-          <svg className="w-5 h-5 ml-0.5 text-lp-gold" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M8 5v14l11-7z" />
-          </svg>
-        ) : (
-          <svg className="w-5 h-5 text-lp-smoke group-hover:text-lp-gold transition-colors" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
-          </svg>
-        )}
-        
-        {/* Tooltip */}
-        <span className="absolute right-14 scale-0 group-hover:scale-100 transition-all duration-200 bg-lp-card border border-lp-border text-lp-smoke text-[10px] uppercase font-bold tracking-wider px-2.5 py-1.5 rounded-lg whitespace-nowrap pointer-events-none select-none">
-          {isCreepPausedUser ? "Resume Auto-scroll" : "Pause Auto-scroll"}
-        </span>
-      </button>
+      {/* Top-Right Controls: Ambient Audio & Auto-scroll */}
+      <div className="fixed top-6 right-6 z-[9990] flex items-center gap-2.5">
+        <BackgroundAudio />
+
+        {/* Auto-scroll Play/Pause Toggle Button */}
+        <button
+          onClick={handleToggleAutoScroll}
+          className="w-12 h-12 rounded-full border border-lp-border bg-lp-bg/60 backdrop-blur-md text-lp-smoke flex items-center justify-center cursor-pointer transition-all duration-300 hover:border-lp-gold/60 hover:text-lp-gold hover:drop-shadow-[0_0_12px_rgba(207,184,124,0.4)] group relative"
+          aria-label={isCreepPausedUser ? "Play Auto-scroll" : "Pause Auto-scroll"}
+        >
+          {isCreepPausedUser ? (
+            <svg className="w-5 h-5 ml-0.5 text-lp-gold" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M8 5v14l11-7z" />
+            </svg>
+          ) : (
+            <svg className="w-5 h-5 text-lp-smoke group-hover:text-lp-gold transition-colors" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+            </svg>
+          )}
+          
+          {/* Tooltip */}
+          <span className="absolute right-14 scale-0 group-hover:scale-100 transition-all duration-200 bg-lp-card border border-lp-border text-lp-smoke text-[10px] uppercase font-bold tracking-wider px-2.5 py-1.5 rounded-lg whitespace-nowrap pointer-events-none select-none">
+            {isCreepPausedUser ? "Resume Auto-scroll" : "Pause Auto-scroll"}
+          </span>
+        </button>
+      </div>
 
        <GoogleAuthProvider>
         <main>
