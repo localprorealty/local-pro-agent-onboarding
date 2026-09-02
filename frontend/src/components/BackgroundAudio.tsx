@@ -1,26 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 
-const STORAGE_KEY = "lp_ambient_muted";
 const AUDIO_SRC = "/ambient.mp3";
 const AMBIENT_VOLUME = 0.15;
 
 export function BackgroundAudio() {
-  const [isMuted, setIsMuted] = useState(() => {
-    try {
-      return localStorage.getItem(STORAGE_KEY) === "true";
-    } catch {
-      return false;
-    }
-  });
-
+  const [isMuted, setIsMuted] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const isVideoPlayingRef = useRef(false);
-  const isMutedRef = useRef(isMuted);
-
-  useEffect(() => {
-    isMutedRef.current = isMuted;
-  }, [isMuted]);
+  const userExplicitlyMutedRef = useRef(false);
 
   useEffect(() => {
     const audio = new Audio(AUDIO_SRC);
@@ -29,20 +17,25 @@ export function BackgroundAudio() {
     audio.preload = "auto";
     audioRef.current = audio;
 
-    audio.addEventListener("playing", () => setIsPlaying(true));
+    audio.addEventListener("playing", () => {
+      setIsPlaying(true);
+      setIsMuted(false);
+    });
     audio.addEventListener("pause", () => setIsPlaying(false));
     audio.addEventListener("ended", () => setIsPlaying(false));
     audio.onerror = () => setIsPlaying(false);
 
     const tryPlay = () => {
       if (!audioRef.current) return;
-      if (isMutedRef.current || isVideoPlayingRef.current || document.hidden) return;
+      if (userExplicitlyMutedRef.current || isVideoPlayingRef.current || document.hidden) return;
 
+      audioRef.current.volume = AMBIENT_VOLUME;
       const promise = audioRef.current.play();
       if (promise !== undefined) {
         promise
           .then(() => {
             setIsPlaying(true);
+            setIsMuted(false);
           })
           .catch(() => {
             setIsPlaying(false);
@@ -57,12 +50,12 @@ export function BackgroundAudio() {
       }
     };
 
-    // Attempt autoplay on mount
+    // Attempt autoplay immediately
     tryPlay();
 
-    // Universal interaction triggers
+    // Universal interaction triggers (click, scroll, wheel, touch, keydown, autoscroll)
     const handleGesture = () => {
-      if (!isMutedRef.current && !isVideoPlayingRef.current && !document.hidden) {
+      if (!userExplicitlyMutedRef.current && !isVideoPlayingRef.current && !document.hidden) {
         tryPlay();
       }
     };
@@ -81,7 +74,8 @@ export function BackgroundAudio() {
     ];
 
     gestureEvents.forEach((evt) => {
-      window.addEventListener(evt, handleGesture, { passive: true });
+      window.addEventListener(evt, handleGesture, { capture: true, passive: true });
+      document.addEventListener(evt, handleGesture, { capture: true, passive: true });
     });
 
     // Page Visibility API
@@ -89,7 +83,7 @@ export function BackgroundAudio() {
       if (document.hidden) {
         pauseAudio();
       } else {
-        if (!isMutedRef.current && !isVideoPlayingRef.current) {
+        if (!userExplicitlyMutedRef.current && !isVideoPlayingRef.current) {
           tryPlay();
         }
       }
@@ -116,7 +110,7 @@ export function BackgroundAudio() {
           (v) => !v.paused && !v.ended && !v.muted && v.readyState > 2
         );
         isVideoPlayingRef.current = anyUnmutedPlaying;
-        if (!anyUnmutedPlaying && !isMutedRef.current && !document.hidden) {
+        if (!anyUnmutedPlaying && !userExplicitlyMutedRef.current && !document.hidden) {
           tryPlay();
         }
       }
@@ -128,7 +122,8 @@ export function BackgroundAudio() {
 
     return () => {
       gestureEvents.forEach((evt) => {
-        window.removeEventListener(evt, handleGesture);
+        window.removeEventListener(evt, handleGesture, { capture: true });
+        document.removeEventListener(evt, handleGesture, { capture: true });
       });
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       window.removeEventListener("play", handleVideoPlay, true);
@@ -145,34 +140,25 @@ export function BackgroundAudio() {
   const toggleAudio = (e?: React.MouseEvent) => {
     e?.stopPropagation();
 
-    // If audio is currently playing, clicking it mutes it
-    // If audio is NOT playing (due to browser autoplay restriction or muted state), clicking it starts audio!
-    if (isPlaying) {
+    if (isPlaying && !isMuted) {
+      // User explicitly mutes
+      userExplicitlyMutedRef.current = true;
       setIsMuted(true);
-      isMutedRef.current = true;
-      try {
-        localStorage.setItem(STORAGE_KEY, "true");
-      } catch {
-        // ignore storage errors
-      }
       if (audioRef.current) {
         audioRef.current.pause();
       }
       setIsPlaying(false);
     } else {
+      // User explicitly unmutes / plays
+      userExplicitlyMutedRef.current = false;
       setIsMuted(false);
-      isMutedRef.current = false;
-      try {
-        localStorage.setItem(STORAGE_KEY, "false");
-      } catch {
-        // ignore storage errors
-      }
       if (audioRef.current) {
         audioRef.current.volume = AMBIENT_VOLUME;
         audioRef.current
           .play()
           .then(() => {
             setIsPlaying(true);
+            setIsMuted(false);
           })
           .catch(() => {
             setIsPlaying(false);
