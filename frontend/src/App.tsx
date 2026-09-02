@@ -255,6 +255,7 @@ export default function App() {
     let snapTimeout: any;
 
     const handleScroll = (e: any) => {
+      window.dispatchEvent(new CustomEvent("lp-scroll-activity"));
       clearTimeout(snapTimeout);
       if (isSnapping) return;
 

@@ -55,24 +55,32 @@ export function BackgroundAudio() {
       }
     };
 
-    // First user gesture handler (click, keydown, touchstart)
-    const handleFirstInteraction = () => {
+    // Attempt autoplay immediately on mount (if browser MEI permits)
+    playAudio();
+
+    // Universal interaction triggers (click, scroll, wheel, touch, keydown, autoscroll)
+    const handleInteractionTrigger = () => {
       userInteractedRef.current = true;
       if (!isMutedRef.current && !isVideoPlayingRef.current && !document.hidden) {
         playAudio();
       }
-      cleanupInteractionListeners();
     };
 
-    const cleanupInteractionListeners = () => {
-      window.removeEventListener("click", handleFirstInteraction);
-      window.removeEventListener("touchstart", handleFirstInteraction);
-      window.removeEventListener("keydown", handleFirstInteraction);
-    };
+    const interactionEvents = [
+      "pointerdown",
+      "mousedown",
+      "click",
+      "touchstart",
+      "wheel",
+      "scroll",
+      "keydown",
+      "resume-creep",
+      "lp-scroll-activity",
+    ];
 
-    window.addEventListener("click", handleFirstInteraction, { passive: true, once: true });
-    window.addEventListener("touchstart", handleFirstInteraction, { passive: true, once: true });
-    window.addEventListener("keydown", handleFirstInteraction, { passive: true, once: true });
+    interactionEvents.forEach((evt) => {
+      window.addEventListener(evt, handleInteractionTrigger, { passive: true });
+    });
 
     // Page Visibility API: pause when tab is backgrounded, resume when active
     const handleVisibilityChange = () => {
@@ -112,7 +120,9 @@ export function BackgroundAudio() {
     window.addEventListener("ended", handleVideoPauseOrEnded, true);
 
     return () => {
-      cleanupInteractionListeners();
+      interactionEvents.forEach((evt) => {
+        window.removeEventListener(evt, handleInteractionTrigger);
+      });
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       window.removeEventListener("play", handleVideoPlay, true);
       window.removeEventListener("pause", handleVideoPauseOrEnded, true);
