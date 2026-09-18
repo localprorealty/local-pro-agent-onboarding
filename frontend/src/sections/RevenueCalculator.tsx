@@ -71,6 +71,7 @@ function CountUp({ value }: { value: number }) {
 export function RevenueCalculator({ data }: { data: SectionData }) {
   const [referredAgents, setReferredAgents] = useState(5);
   const [capPercent, setCapPercent] = useState(75);
+  const [fullyCappedAgents, setFullyCappedAgents] = useState(0);
   const [capAmount, setCapAmount] = useState(16000);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
@@ -82,6 +83,15 @@ export function RevenueCalculator({ data }: { data: SectionData }) {
     return () => mediaQuery.removeEventListener("change", handler);
   }, []);
 
+  // Update referred agents while ensuring fully capped count doesn't exceed it
+  const updateReferredAgents = (val: number) => {
+    const nextVal = Math.min(30, Math.max(1, val));
+    setReferredAgents(nextVal);
+    if (fullyCappedAgents > nextVal) {
+      setFullyCappedAgents(nextVal);
+    }
+  };
+
   // Determine active tier based on referred agents count
   let activeTierConfig = TIER_CONFIG[0];
   for (const t of TIER_CONFIG) {
@@ -91,17 +101,18 @@ export function RevenueCalculator({ data }: { data: SectionData }) {
   }
   const activeTier = activeTierConfig.tier;
 
-  // New formula per referred agent:
+  // Formula per referred agent and decoupled bonus:
   // pool = capAmount / 2 (50% of whatever cap amount is set)
   // progressPayout = tierRate × pool × (avgCapPercentPaidIn / 100)
-  // bonusPayout = avgCapPercentPaidIn >= 100 ? completionBonus[tier] : 0
-  // payoutPerAgent = progressPayout + bonusPayout
-  // total = payoutPerAgent × referredAgents
+  // bonusPayout = fullyCappedAgents × completionBonus[tier]
+  // total = (progressPayout × referredAgents) + bonusPayout
+  // payoutPerAgent = total / referredAgents
+  const effectiveFullyCapped = Math.min(fullyCappedAgents, referredAgents);
   const pool = capAmount / 2;
   const progressPayout = activeTierConfig.flatRate * pool * (capPercent / 100);
-  const bonusPayout = capPercent >= 100 ? activeTierConfig.completionBonus : 0;
-  const payoutPerAgent = progressPayout + bonusPayout;
-  const totalPayout = payoutPerAgent * referredAgents;
+  const bonusPayout = effectiveFullyCapped * activeTierConfig.completionBonus;
+  const totalPayout = (progressPayout * referredAgents) + bonusPayout;
+  const payoutPerAgent = referredAgents > 0 ? totalPayout / referredAgents : 0;
 
   return (
     <SectionShell id={data.id}>
@@ -140,7 +151,7 @@ export function RevenueCalculator({ data }: { data: SectionData }) {
                     min="1"
                     max="30"
                     value={referredAgents}
-                    onChange={(e) => setReferredAgents(Math.min(30, Math.max(1, Number(e.target.value))))}
+                    onChange={(e) => updateReferredAgents(Number(e.target.value))}
                     className="w-16 bg-lp-bg border border-lp-border rounded px-2 py-1 text-center text-lp-gold focus:border-lp-gold outline-none text-sm font-semibold"
                   />
                 </div>
@@ -151,7 +162,7 @@ export function RevenueCalculator({ data }: { data: SectionData }) {
                 min="1"
                 max="30"
                 value={referredAgents}
-                onChange={(e) => setReferredAgents(Number(e.target.value))}
+                onChange={(e) => updateReferredAgents(Number(e.target.value))}
                 className="w-full accent-lp-gold cursor-pointer bg-lp-border rounded-lg appearance-none h-2"
                 aria-label="Referred Agents Slider"
               />
@@ -192,7 +203,34 @@ export function RevenueCalculator({ data }: { data: SectionData }) {
               </div>
             </div>
 
-            {/* Input 3: Cap Amount */}
+            {/* Input 3: Fully Capped Agents */}
+            <div className="flex flex-col gap-2">
+              <div className="flex justify-between items-center text-sm font-medium">
+                <label htmlFor="fully-capped-input" className="text-lp-smoke inline-flex items-center gap-1">
+                  Fully Capped Agents
+                  <Tooltip text="Paid per agent who has fully capped out this year — enter that count above, independent of the group's average progress.">
+                    <span className="text-lp-gold select-none font-normal text-[11px] font-body bg-lp-gold/10 px-1 rounded hover:bg-lp-gold/20 transition-colors">ⓘ</span>
+                  </Tooltip>
+                </label>
+                <input
+                  id="fully-capped-input"
+                  type="number"
+                  min="0"
+                  max={referredAgents}
+                  value={effectiveFullyCapped}
+                  onChange={(e) => {
+                    const val = e.target.value === "" ? 0 : Number(e.target.value);
+                    setFullyCappedAgents(Math.max(0, Math.min(referredAgents, isNaN(val) ? 0 : val)));
+                  }}
+                  className="w-20 bg-lp-bg border border-lp-border rounded-lg px-3 py-1.5 text-right text-lp-gold focus:border-lp-gold outline-none text-sm font-semibold"
+                />
+              </div>
+              <p className="text-xs text-lp-grey">
+                How many of your referred agents have already fully capped out this year — separate from the group average above.
+              </p>
+            </div>
+
+            {/* Input 4: Cap Amount */}
             <div className="flex flex-col gap-2">
               <div className="flex justify-between items-center text-sm font-medium">
                 <label htmlFor="cap-amount-input" className="text-lp-smoke">Cap Amount Per Agent</label>
@@ -230,23 +268,21 @@ export function RevenueCalculator({ data }: { data: SectionData }) {
                   <span className="text-lp-smoke font-body">
                     {activeTierConfig.rateDisplay} &times; ${Math.round(pool).toLocaleString()} &times; {capPercent}% paid in ={" "}
                     <span className="text-lp-gold font-semibold">${Math.round(progressPayout).toLocaleString()}</span>
+                    <span className="text-lp-grey font-normal"> / agent</span>
                   </span>
                 </div>
                 <div className="flex justify-between items-center text-xs py-1">
                   <span className="text-lp-grey inline-flex items-center gap-1">
                     Completion Bonus:
-                    <Tooltip text="A one-time bonus paid when your referred agent fully caps out for the year.">
+                    <Tooltip text="Paid per agent who has fully capped out this year — enter that count above, independent of the group's average progress.">
                       <span className="text-lp-gold select-none font-normal text-[11px] font-body bg-lp-gold/10 px-1 rounded hover:bg-lp-gold/20 transition-colors">ⓘ</span>
                     </Tooltip>
                   </span>
                   <span className="text-lp-smoke font-body">
-                    {bonusPayout > 0 ? (
-                      <span className="text-lp-gold font-semibold">
-                        ${bonusPayout.toLocaleString()}
-                      </span>
-                    ) : (
-                      <span className="text-lp-grey/50">Not reached (requires 100% cap paid in)</span>
-                    )}
+                    {effectiveFullyCapped} fully capped &times; ${activeTierConfig.completionBonus.toLocaleString()} ={" "}
+                    <span className="text-lp-gold font-semibold">
+                      ${bonusPayout.toLocaleString()}
+                    </span>
                   </span>
                 </div>
               </div>
