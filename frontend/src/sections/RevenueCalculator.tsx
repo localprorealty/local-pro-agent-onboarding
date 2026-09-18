@@ -26,24 +26,25 @@ export function DiscoverCue({ label = "Hands-on demo below", prefersReducedMotio
   );
 }
 
-// Constants from LocalPRO Hub legacy rate table
-const TIER_ELIGIBILITY = [
-  { tier: 1, minAgents: 1, label: "Tier 1 (1+ referred)" },
-  { tier: 2, minAgents: 10, label: "Tier 2 (10+ referred)" },
-  { tier: 3, minAgents: 15, label: "Tier 3 (15+ referred)" },
-  { tier: 4, minAgents: 20, label: "Tier 4 (20+ referred)" },
-  { tier: 5, minAgents: 25, label: "Tier 5 (25+ referred)" },
+// Constants from LocalPRO official Revenue Share Policy
+interface TierConfig {
+  tier: number;
+  minAgents: number;
+  flatRate: number;
+  rateDisplay: string;
+  completionBonus: number;
+  label: string;
+}
+
+const TIER_CONFIG: TierConfig[] = [
+  { tier: 1, minAgents: 1, flatRate: 0.2750, rateDisplay: "27.5%", completionBonus: 1000, label: "Tier 1 (1+ referred)" },
+  { tier: 2, minAgents: 10, flatRate: 0.1062, rateDisplay: "10.62%", completionBonus: 750, label: "Tier 2 (10+ referred)" },
+  { tier: 3, minAgents: 15, flatRate: 0.0375, rateDisplay: "3.75%", completionBonus: 500, label: "Tier 3 (15+ referred)" },
+  { tier: 4, minAgents: 20, flatRate: 0.0313, rateDisplay: "3.13%", completionBonus: 750, label: "Tier 4 (20+ referred)" },
+  { tier: 5, minAgents: 25, flatRate: 0.0500, rateDisplay: "5.0%", completionBonus: 1000, label: "Tier 5 (25+ referred)" },
 ];
 
-const RATE_MATRIX: Record<number, number[]> = {
-  1: [0.05, 0.07, 0.12, 0.16],     // Tier 1 rates per band
-  2: [0.02, 0.04, 0.06, 0.08],     // Tier 2 rates per band
-  3: [0.01, 0.015, 0.02, 0.035],   // Tier 3 rates per band
-  4: [0.01, 0.02, 0.03, 0.06],     // Tier 4 rates per band
-  5: [0.01, 0.03, 0.06, 0.10],     // Tier 5 rates per band
-};
-
-// Help helper function to animate numbers gracefully
+// Helper function to animate numbers gracefully
 function CountUp({ value }: { value: number }) {
   const [displayVal, setDisplayVal] = useState(value);
 
@@ -82,35 +83,24 @@ export function RevenueCalculator({ data }: { data: SectionData }) {
   }, []);
 
   // Determine active tier based on referred agents count
-  let activeTier = 1;
-  for (const t of TIER_ELIGIBILITY) {
+  let activeTierConfig = TIER_CONFIG[0];
+  for (const t of TIER_CONFIG) {
     if (referredAgents >= t.minAgents) {
-      activeTier = t.tier;
+      activeTierConfig = t;
     }
   }
+  const activeTier = activeTierConfig.tier;
 
-  // Calculate portion of cap % in each band (max 25% per band)
-  const getBandPortion = (percent: number, bandIndex: number): number => {
-    const start = bandIndex * 25;
-    const end = start + 25;
-    if (percent <= start) return 0;
-    if (percent >= end) return 25;
-    return percent - start;
-  };
-
-  const rates = RATE_MATRIX[activeTier];
-  
-  // Calculate dollar portion, rate, and payout for each band
-  const bandsBreakdown = Array.from({ length: 4 }).map((_, i) => {
-    const bandPercent = getBandPortion(capPercent, i);
-    const bandDollar = (bandPercent / 100) * capAmount;
-    const rate = rates[i];
-    const payout = bandDollar * rate;
-    const label = i === 0 ? "0–25%" : i === 1 ? "25–50%" : i === 2 ? "50–75%" : "75–100%";
-    return { label, bandPercent, bandDollar, rate, payout };
-  });
-
-  const payoutPerAgent = bandsBreakdown.reduce((sum, b) => sum + b.payout, 0);
+  // New formula per referred agent:
+  // pool = capAmount / 2 (50% of whatever cap amount is set)
+  // progressPayout = tierRate × pool × (avgCapPercentPaidIn / 100)
+  // bonusPayout = avgCapPercentPaidIn >= 100 ? completionBonus[tier] : 0
+  // payoutPerAgent = progressPayout + bonusPayout
+  // total = payoutPerAgent × referredAgents
+  const pool = capAmount / 2;
+  const progressPayout = activeTierConfig.flatRate * pool * (capPercent / 100);
+  const bonusPayout = capPercent >= 100 ? activeTierConfig.completionBonus : 0;
+  const payoutPerAgent = progressPayout + bonusPayout;
   const totalPayout = payoutPerAgent * referredAgents;
 
   return (
@@ -223,26 +213,42 @@ export function RevenueCalculator({ data }: { data: SectionData }) {
               </p>
             </div>
             
-            {/* Custom Bands Breakdown (Transparency value-add) */}
+            {/* Calculation Breakdown Panel */}
             <div className="mt-4 pt-4 border-t border-lp-border/50">
               <h4 className="text-xs font-semibold uppercase tracking-wider text-lp-grey mb-3">
                 Calculation Breakdown (Active Tier {activeTier})
               </h4>
-              <div className="flex flex-col gap-2">
-                {bandsBreakdown.map((b, i) => (
-                  <div key={i} className="flex justify-between items-center text-xs py-1 border-b border-lp-border/30 last:border-0">
-                    <span className="text-lp-grey">{b.label} Band:</span>
-                    <span className="text-lp-smoke font-body">
-                      {b.bandPercent > 0 ? (
-                        <>
-                          {(b.bandPercent * 4).toFixed(0)}% paid ({Math.round(b.bandPercent * 4)}% of band) &times; {(b.rate * 100).toFixed(1)}% = <span className="text-lp-gold font-semibold">${Math.round(b.payout).toLocaleString()}</span>
-                        </>
-                      ) : (
-                        <span className="text-lp-grey/50">Not reached</span>
-                      )}
-                    </span>
-                  </div>
-                ))}
+              <div className="flex flex-col gap-2.5 font-body">
+                <div className="flex justify-between items-center text-xs py-1 border-b border-lp-border/30">
+                  <span className="text-lp-grey">Revenue Share Pool:</span>
+                  <span className="text-lp-smoke font-body">
+                    ${Math.round(pool).toLocaleString()} <span className="text-lp-grey font-normal">(50% of ${Math.round(capAmount).toLocaleString()} cap)</span>
+                  </span>
+                </div>
+                <div className="flex justify-between items-center text-xs py-1 border-b border-lp-border/30">
+                  <span className="text-lp-grey">Tier {activeTier} Rate:</span>
+                  <span className="text-lp-smoke font-body">
+                    {activeTierConfig.rateDisplay} &times; ${Math.round(pool).toLocaleString()} &times; {capPercent}% paid in ={" "}
+                    <span className="text-lp-gold font-semibold">${Math.round(progressPayout).toLocaleString()}</span>
+                  </span>
+                </div>
+                <div className="flex justify-between items-center text-xs py-1">
+                  <span className="text-lp-grey inline-flex items-center gap-1">
+                    Completion Bonus:
+                    <Tooltip text="A one-time bonus paid when your referred agent fully caps out for the year.">
+                      <span className="text-lp-gold select-none font-normal text-[11px] font-body bg-lp-gold/10 px-1 rounded hover:bg-lp-gold/20 transition-colors">ⓘ</span>
+                    </Tooltip>
+                  </span>
+                  <span className="text-lp-smoke font-body">
+                    {bonusPayout > 0 ? (
+                      <span className="text-lp-gold font-semibold">
+                        ${bonusPayout.toLocaleString()}
+                      </span>
+                    ) : (
+                      <span className="text-lp-grey/50">Not reached (requires 100% cap paid in)</span>
+                    )}
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -268,7 +274,7 @@ export function RevenueCalculator({ data }: { data: SectionData }) {
               <div className="flex justify-between items-center text-sm">
                 <span className="text-lp-grey inline-flex items-center gap-1">
                   Qualifying Level
-                  <Tooltip text="The tier (1–5) determined by your number of active referred agents, which determines the rate matrix used.">
+                  <Tooltip text="The tier (1–5) determined by your number of active referred agents, which determines the pool flat rate and completion bonus applied.">
                     <span className="text-lp-gold select-none font-normal text-[11px] font-body bg-lp-gold/10 px-1 rounded hover:bg-lp-gold/20 transition-colors">ⓘ</span>
                   </Tooltip>
                 </span>
@@ -277,12 +283,12 @@ export function RevenueCalculator({ data }: { data: SectionData }) {
               <div className="flex justify-between items-center text-sm">
                 <span className="text-lp-grey inline-flex items-center gap-1">
                   Payout Per Agent
-                  <Tooltip text="The calculated annual revenue share payout generated from a single referred agent based on their average cap percentage contribution.">
+                  <Tooltip text="The calculated annual revenue share payout generated from a single referred agent based on their average cap percentage contribution and bonus eligibility.">
                     <span className="text-lp-gold select-none font-normal text-[11px] font-body bg-lp-gold/10 px-1 rounded hover:bg-lp-gold/20 transition-colors">ⓘ</span>
                   </Tooltip>
                 </span>
                 <span className="text-lp-gold font-semibold">
-                  {payoutPerAgent.toLocaleString("en-US", {
+                  {Math.round(payoutPerAgent).toLocaleString("en-US", {
                     style: "currency",
                     currency: "USD",
                     maximumFractionDigits: 0,
@@ -309,10 +315,10 @@ export function RevenueCalculator({ data }: { data: SectionData }) {
               </div>
             </div>
 
-            {/* Non-negotiable visible caption, styled clearly, not hidden */}
+            {/* Policy & illustrative visible disclaimer */}
             <div className="mt-8 pt-4 border-t border-lp-border/60">
               <p className="text-[11px] md:text-xs text-lp-grey font-medium tracking-wide leading-relaxed">
-                Illustrative example based on LocalPRO's published rate structure. Final numbers are subject to confirmation and may differ.
+                Illustrative example based on LocalPRO's published rate structure. Final numbers are subject to confirmation and may differ. Revenue share is applied toward your own cap first, before converting to cash — per LocalPRO's official Revenue Share Policy.
               </p>
             </div>
 
